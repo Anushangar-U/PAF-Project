@@ -32,4 +32,5 @@ class ResourceService {
 }
 
 // Export a single instance of this service so we can use it anywhere
-export default new ResourceService();
+const resourceServiceInstance = new ResourceService();
+export default resourceServiceInstance;

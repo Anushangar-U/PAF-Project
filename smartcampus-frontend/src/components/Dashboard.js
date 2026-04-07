@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   FaUniversity, FaChartLine, FaDraftingCompass, FaBookOpen, FaGraduationCap,
   FaChalkboardTeacher, FaUsers, FaUserTie, FaMicrochip, FaMicroscope, FaCogs
@@ -6,6 +6,7 @@ import {
 import { MdOutlineComputer, MdArrowForward } from 'react-icons/md';
 import { BsGearFill, BsCpuFill } from 'react-icons/bs';
 import { RiOrganizationChart } from 'react-icons/ri';
+import ResourceHub from './ResourceHub';
 import './Dashboard.css';
 
 // Mock data structured similarly to the user's dashboard image
@@ -85,6 +86,8 @@ const facultiesData = [
 ];
 
 const Dashboard = ({ renderContent }) => {
+  const [activeTab, setActiveTab] = useState('faculties');
+
   return (
     <div className="dashboard-layout">
       {/* Sidebar Layout */}
@@ -98,10 +101,16 @@ const Dashboard = ({ renderContent }) => {
         </div>
         
         <nav className="sidebar-menu">
-          <div className="menu-item active">
+          <div 
+            className={`menu-item ${activeTab === 'faculties' ? 'active' : ''}`}
+            onClick={() => setActiveTab('faculties')}
+          >
             <FaChalkboardTeacher /> Faculties
           </div>
-          <div className="menu-item">
+          <div 
+            className={`menu-item ${activeTab === 'resource-hub' ? 'active' : ''}`}
+            onClick={() => setActiveTab('resource-hub')}
+          >
             <RiOrganizationChart /> Resource Hub
           </div>
           <div className="menu-item small" style={{ marginTop: 'auto', opacity: 0.5 }}>
@@ -112,71 +121,78 @@ const Dashboard = ({ renderContent }) => {
 
       {/* Main Content Area */}
       <main className="main-content">
-        {/* If the current view is just the Faculties Dashboard */}
+        {/* If the current view is just the Faculties Dashboard or Resource Hub */}
         {!renderContent ? (
           <>
-            {/* Header section matching mockup */}
-            <header className="top-bar">
-              <div className="page-header-info">
-                <div className="page-title">
-                  <FaUniversity className="page-title-icon" />
-                  <h1>Academic Faculties</h1>
-                </div>
-                <p className="page-subtitle">Explore departments, resources, and allocate smartly</p>
-              </div>
-              <div className="summary-badge">
-                <span><RiOrganizationChart /> 6 Faculties</span>
-                <span><FaUsers /> 8530 Students</span>
-              </div>
-            </header>
-
-            {/* Grid display of faculties */}
-            <div className="faculties-grid">
-              {facultiesData.map((faculty) => (
-                <div className="faculty-card" key={faculty.id} style={{ '--theme-color': faculty.themeColor }}>
-                  
-                  <div className="card-header">
-                    {faculty.icon}
-                    <div className="card-title-group">
-                      <h3>{faculty.title}</h3>
-                      <p>{faculty.id}</p>
+            {activeTab === 'faculties' && (
+              <>
+                <header className="top-bar">
+                  <div className="page-header-info">
+                    <div className="page-title">
+                      <FaUniversity className="page-title-icon" />
+                      <h1>Academic Faculties</h1>
                     </div>
+                    <p className="page-subtitle">Explore departments, resources, and allocate smartly</p>
                   </div>
-
-                  <div className="dean-info">
-                    <FaUserTie /> Dean: {faculty.dean}
+                  <div className="summary-badge">
+                    <span><RiOrganizationChart /> 6 Faculties</span>
+                    <span><FaUsers /> 8530 Students</span>
                   </div>
+                </header>
 
-                  <div className="stats-row">
-                    <div className="stat-item"><FaUsers /> {faculty.students} students</div>
-                    <div className="stat-item"><FaChalkboardTeacher /> {faculty.staff} staff</div>
-                  </div>
-
-                  <div className="departments">
-                    <strong><RiOrganizationChart /> Departments:</strong>
-                    {faculty.departments}
-                  </div>
-
-                  <div className="resources-section">
-                    <strong><BsGearFill /> Key Resources:</strong>
-                    <div className="resource-tags">
-                      {faculty.keyResources.map((res, i) => (
-                        <div className="resource-tag" key={i}>
-                          <span>📌</span> {res}
+                {/* Grid display of faculties */}
+                <div className="faculties-grid">
+                  {facultiesData.map((faculty) => (
+                    <div className="faculty-card" key={faculty.id} style={{ '--theme-color': faculty.themeColor }}>
+                      
+                      <div className="card-header">
+                        {faculty.icon}
+                        <div className="card-title-group">
+                          <h3>{faculty.title}</h3>
+                          <p>{faculty.id}</p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
 
-                  <div className="card-actions">
-                    <button className="btn-allocate">
-                      <MdArrowForward /> Allocate Resource to {faculty.id}
-                    </button>
-                    <button className="btn-stats">Quick Stats</button>
-                  </div>
+                      <div className="dean-info">
+                        <FaUserTie /> Dean: {faculty.dean}
+                      </div>
+
+                      <div className="stats-row">
+                        <div className="stat-item"><FaUsers /> {faculty.students} students</div>
+                        <div className="stat-item"><FaChalkboardTeacher /> {faculty.staff} staff</div>
+                      </div>
+
+                      <div className="departments">
+                        <strong><RiOrganizationChart /> Departments:</strong>
+                        {faculty.departments}
+                      </div>
+
+                      <div className="resources-section">
+                        <strong><BsGearFill /> Key Resources:</strong>
+                        <div className="resource-tags">
+                          {faculty.keyResources.map((res, i) => (
+                            <div className="resource-tag" key={i}>
+                              <span>📌</span> {res}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="card-actions">
+                        <button className="btn-allocate">
+                          <MdArrowForward /> Allocate Resource to {faculty.id}
+                        </button>
+                        <button className="btn-stats">Quick Stats</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
+
+            {activeTab === 'resource-hub' && (
+              <ResourceHub />
+            )}
           </>
         ) : (
           renderContent()

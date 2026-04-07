@@ -2,6 +2,10 @@ import React from 'react';
 import './App.css';
 import Dashboard from './components/Dashboard';
 
+import ResourceList from './components/ResourceList';
+import BookingForm from './components/BookingForm';
+import MyBookings from './components/MyBookings';
+
 function App() {
   return (
     <div className="App">

@@ -1,11 +1,12 @@
 import React from 'react';
 import './App.css';
-import ResourceList from './components/ResourceList';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
     <div className="App">
-      <ResourceList />
+      {/* We are rendering the new Dashboard matching the mock-up */}
+      <Dashboard />
     </div>
   );
 }

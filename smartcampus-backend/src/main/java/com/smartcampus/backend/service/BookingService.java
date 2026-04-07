@@ -2,7 +2,9 @@ package com.smartcampus.backend.service;
 
 import com.smartcampus.backend.entity.Booking;
 import com.smartcampus.backend.repository.BookingRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +28,7 @@ public class BookingService {
         );
 
         if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Booking conflict: this resource is already booked for the selected time");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Time slot already booked!");
         }
 
         booking.setStatus("PENDING");
@@ -45,7 +47,7 @@ public class BookingService {
 
     public Booking approveBooking(Long id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         List<Booking> conflicts = bookingRepository.findConflictingApprovedBookings(
                 booking.getResourceId(),
@@ -54,7 +56,7 @@ public class BookingService {
         );
 
         if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Cannot approve booking due to time conflict");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot approve booking due to time conflict");
         }
 
         booking.setStatus("APPROVED");
@@ -65,7 +67,7 @@ public class BookingService {
 
     public Booking rejectBooking(Long id, String reason) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         booking.setStatus("REJECTED");
         booking.setRejectionReason(reason);
@@ -75,7 +77,7 @@ public class BookingService {
 
     public Booking cancelBooking(Long id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         booking.setStatus("CANCELLED");
         return bookingRepository.save(booking);
@@ -83,19 +85,19 @@ public class BookingService {
 
     private void validateBooking(Booking booking) {
         if (booking.getUserId() == null) {
-            throw new RuntimeException("User ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
         }
         if (booking.getResourceId() == null) {
-            throw new RuntimeException("Resource ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resource ID is required");
         }
         if (booking.getStartTime() == null || booking.getEndTime() == null) {
-            throw new RuntimeException("Start time and end time are required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time and end time are required");
         }
         if (!booking.getStartTime().isBefore(booking.getEndTime())) {
-            throw new RuntimeException("Start time must be before end time");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time must be before end time");
         }
         if (booking.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Booking cannot be created for a past time");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking cannot be created for a past time");
         }
     }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ResourceService from '../services/ResourceService';
+import AddResourceForm from './AddResourceForm';
 
 const ResourceList = () => {
     // State to hold the list of resources returned from the database
@@ -24,6 +25,10 @@ const ResourceList = () => {
     return (
         <div style={{ padding: '20px' }}>
             <h2 className="text-center">Facilities & Assets Catalogue</h2>
+            
+            {/* The new form component! Pass fetchResources so the form can trigger a table refresh when a new item is added */}
+            <AddResourceForm onResourceAdded={fetchResources} />
+            
             <table border="1" cellPadding="10" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
                 <thead style={{ backgroundColor: '#f2f2f2' }}>
                     <tr>

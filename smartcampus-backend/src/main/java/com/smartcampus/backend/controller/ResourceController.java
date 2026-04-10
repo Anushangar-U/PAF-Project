@@ -24,6 +24,29 @@ public class ResourceController {
         return new ResponseEntity<>(savedResource, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Resource> getResourceById(@PathVariable Long id) {
+    return resourceService.getResourceById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<List<Resource>> searchResources(
+        @RequestParam(required = false) String type,
+        @RequestParam(required = false) Integer minCapacity,
+        @RequestParam(required = false) String location,
+        @RequestParam(required = false) String status) {
+    
+    List<Resource> resources = resourceService.getAllResources().stream()
+        .filter(r -> type == null || r.getType().equalsIgnoreCase(type))
+        .filter(r -> minCapacity == null || r.getCapacity() >= minCapacity)
+        .filter(r -> location == null || r.getLocation().toLowerCase().contains(location.toLowerCase()))
+        .filter(r -> status == null || r.getStatus().equalsIgnoreCase(status))
+        .toList();
+    
+    return ResponseEntity.ok(resources);
+}
     @GetMapping
     public ResponseEntity<List<Resource>> getAllResources(@RequestParam(required = false) String type) {
         List<Resource> resources;

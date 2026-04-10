@@ -9,7 +9,6 @@ import { RiOrganizationChart } from 'react-icons/ri';
 import ResourceHub from './ResourceHub';
 import './Dashboard.css';
 
-// Mock data structured similarly to the user's dashboard image
 const facultiesData = [
   {
     id: 'FOC',
@@ -176,13 +175,6 @@ const Dashboard = ({ renderContent }) => {
                             </div>
                           ))}
                         </div>
-                      </div>
-
-                      <div className="card-actions">
-                        <button className="btn-allocate">
-                          <MdArrowForward /> Allocate Resource to {faculty.id}
-                        </button>
-                        <button className="btn-stats">Quick Stats</button>
                       </div>
                     </div>
                   ))}

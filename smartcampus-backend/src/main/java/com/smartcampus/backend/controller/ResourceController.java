@@ -24,6 +24,12 @@ public class ResourceController {
         return new ResponseEntity<>(savedResource, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Resource> getResourceById(@PathVariable Long id) {
+    return resourceService.getResourceById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    }
     @GetMapping
     public ResponseEntity<List<Resource>> getAllResources(@RequestParam(required = false) String type) {
         List<Resource> resources;

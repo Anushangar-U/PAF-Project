@@ -1,176 +1,277 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FaMicrochip, FaFutbol, FaCouch, FaFlask, FaMapMarkerAlt } from 'react-icons/fa';
+import { 
+  FaMicrochip, 
+  FaChalkboardTeacher, 
+  FaDoorOpen, 
+  FaTools, 
+  FaMapMarkerAlt,
+  FaCheckCircle,
+  FaExclamationTriangle 
+} from 'react-icons/fa';
 import { RiOrganizationChart } from 'react-icons/ri';
 import { MdArrowForward } from 'react-icons/md';
 import ResourceService from '../services/ResourceService';
 import './ResourceHub.css';
 
+// Category configuration matching your backend types
 const CATEGORY_CONFIG = {
-  electronics: {
-    title: 'Electronics & Gadgets',
+  'Lecture Hall': {
+    title: 'Lecture Halls',
+    icon: <FaChalkboardTeacher />,
+    headerColor: '#ebf8ff',
+    borderColor: '#3182ce'
+  },
+  'Lab': {
+    title: 'Laboratories',
     icon: <FaMicrochip />,
-    headerColor: '#f0f5fa',
+    headerColor: '#f0fff4',
+    borderColor: '#38a169'
   },
-  sports: {
-    title: 'Sports Equipment',
-    icon: <FaFutbol />,
-    headerColor: '#e8f5e9',
+  'Meeting Room': {
+    title: 'Meeting Rooms',
+    icon: <FaDoorOpen />,
+    headerColor: '#fffaf0',
+    borderColor: '#dd6b20'
   },
-  furniture: {
-    title: 'Furniture & Fixtures',
-    icon: <FaCouch />,
-    headerColor: '#fff3e0',
+  'Equipment': {
+    title: 'Equipment',
+    icon: <FaTools />,
+    headerColor: '#faf5ff',
+    borderColor: '#805ad5'
   },
-  lab: {
-    title: 'Lab Equipment',
-    icon: <FaFlask />,
-    headerColor: '#f3e5f5',
-  },
-  other: {
+  'Other': {
     title: 'Other Resources',
-    icon: <FaMicrochip />,
-    headerColor: '#edf2f7',
-  },
-};
-
-const CATEGORY_ORDER = ['electronics', 'sports', 'furniture', 'lab', 'other'];
-
-const resolveCategoryKey = (type) => {
-  const normalized = (type || '').toLowerCase();
-  if (normalized.includes('sport')) return 'sports';
-  if (normalized.includes('furn')) return 'furniture';
-  if (normalized.includes('lab')) return 'lab';
-  if (normalized.includes('elect') || normalized.includes('gadget') || normalized.includes('device')) {
-    return 'electronics';
+    icon: <RiOrganizationChart />,
+    headerColor: '#f7fafc',
+    borderColor: '#a0aec0'
   }
-  if (normalized) return 'other';
-  return 'other';
 };
 
 const ResourceHub = () => {
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedType, setSelectedType] = useState('All');
 
+  // Fetch resources from backend
   useEffect(() => {
     let isMounted = true;
 
-    ResourceService.getAllResources()
-      .then((response) => {
+    const fetchResources = async () => {
+      try {
+        setIsLoading(true);
+        const response = await ResourceService.getAllResources();
         if (isMounted) {
           setResources(Array.isArray(response.data) ? response.data : []);
-          setIsLoading(false);
+          setErrorMessage('');
         }
-      })
-      .catch(() => {
+      } catch (error) {
         if (isMounted) {
-          setResources([]);
-          setIsLoading(false);
-          setErrorMessage('Unable to load resources from the server.');
+          console.error('Error fetching resources:', error);
+          setErrorMessage('Unable to load resources. Please ensure the backend is running.');
         }
-      });
-
-    return () => {
-      isMounted = false;
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
+
+    fetchResources();
+    return () => { isMounted = false; };
   }, []);
 
+  // Group resources by type
   const resourceCategories = useMemo(() => {
     const grouped = new Map();
 
     resources.forEach((resource) => {
-      const key = resolveCategoryKey(resource.type);
-      const config = CATEGORY_CONFIG[key] || CATEGORY_CONFIG.other;
+      const type = resource.type || 'Other';
+      const config = CATEGORY_CONFIG[type] || CATEGORY_CONFIG['Other'];
 
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          id: key,
+      if (!grouped.has(type)) {
+        grouped.set(type, {
+          type: type,
           title: config.title,
           icon: config.icon,
           headerColor: config.headerColor,
+          borderColor: config.borderColor,
           items: [],
         });
       }
 
-      const total = Number.isFinite(Number(resource.capacity)) ? Number(resource.capacity) : 0;
-      grouped.get(key).items.push({
+      grouped.get(type).items.push({
+        id: resource.id,
         name: resource.name || 'Unnamed Resource',
         location: resource.location || 'Unknown location',
-        total,
-        left: total,
+        capacity: resource.capacity || 0,
+        availabilityWindows: resource.availabilityWindows || 'Not specified',
+        status: resource.status || 'UNKNOWN',
       });
     });
 
-    return CATEGORY_ORDER
-      .filter((key) => grouped.has(key))
-      .map((key) => grouped.get(key));
+    return Array.from(grouped.values());
+  }, [resources]);
+
+  // Get unique types for filter dropdown
+  const resourceTypes = useMemo(() => {
+    const types = ['All', ...new Set(resources.map(r => r.type).filter(Boolean))];
+    return types;
+  }, [resources]);
+
+  // Filter resources by selected type
+  const filteredCategories = useMemo(() => {
+    if (selectedType === 'All') return resourceCategories;
+    return resourceCategories.filter(cat => cat.type === selectedType);
+  }, [resourceCategories, selectedType]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = resources.length;
+    const active = resources.filter(r => r.status === 'ACTIVE').length;
+    const outOfService = resources.filter(r => r.status === 'OUT_OF_SERVICE').length;
+    return { total, active, outOfService };
   }, [resources]);
 
   return (
     <div className="resource-hub-container">
+      {/* Header */}
       <header className="top-bar">
         <div className="page-header-info">
           <div className="page-title">
             <RiOrganizationChart className="page-title-icon" />
             <h1>Resource Hub</h1>
           </div>
-          <p className="page-subtitle">Categorized equipment & allocation tracking</p>
+          <p className="page-subtitle">Browse and allocate campus resources</p>
+        </div>
+        
+        {/* Stats Cards */}
+        <div className="stats-container">
+          <div className="stat-card">
+            <span className="stat-value">{stats.total}</span>
+            <span className="stat-label">Total Resources</span>
+          </div>
+          <div className="stat-card active">
+            <span className="stat-value">{stats.active}</span>
+            <span className="stat-label">Active</span>
+          </div>
+          <div className="stat-card out-of-service">
+            <span className="stat-value">{stats.outOfService}</span>
+            <span className="stat-label">Out of Service</span>
+          </div>
         </div>
       </header>
 
-      <div className="resource-grid">
-        {isLoading && (
-          <div className="resource-log-preview">
-            <h3>Loading resources...</h3>
-          </div>
-        )}
-
-        {!isLoading && errorMessage && (
-          <div className="resource-log-preview">
-            <h3>{errorMessage}</h3>
-          </div>
-        )}
-
-        {!isLoading && !errorMessage && resourceCategories.length === 0 && (
-          <div className="resource-log-preview">
-            <h3>No resources found yet.</h3>
-          </div>
-        )}
-
-        {!isLoading && !errorMessage && resourceCategories.map((category) => (
-          <div className="resource-category-card" key={category.id}>
-            <div
-              className="category-header"
-              style={{ backgroundColor: category.headerColor }}
-            >
-              <div className="category-icon" style={{ color: '#2d3748' }}>{category.icon}</div>
-              <h3>{category.title}</h3>
-            </div>
-
-            <div className="category-items-list">
-              {category.items.map((item, idx) => (
-                <div className="resource-item-row" key={`${category.id}-${idx}`}>
-                  <div className="item-info">
-                    <h4>{item.name}</h4>
-                    <span className="item-location">
-                      <FaMapMarkerAlt className="pin-icon" /> {item.location} | Total: {item.total}
-                    </span>
-                  </div>
-                  <div className="item-action">
-                    <span className="item-left-count"><strong>{item.left}</strong> left</span>
-                    <button className="btn-allocate-small">
-                      <MdArrowForward /> Allocate
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* Filter Bar */}
+      <div className="filter-bar">
+        <label htmlFor="type-filter">Filter by Type:</label>
+        <select 
+          id="type-filter"
+          value={selectedType} 
+          onChange={(e) => setSelectedType(e.target.value)}
+          className="type-filter"
+        >
+          {resourceTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        <span className="filter-count">
+          Showing {filteredCategories.reduce((sum, cat) => sum + cat.items.length, 0)} resources
+        </span>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading resources...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {!isLoading && errorMessage && (
+        <div className="error-container">
+          <FaExclamationTriangle className="error-icon" />
+          <p>{errorMessage}</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !errorMessage && resources.length === 0 && (
+        <div className="empty-container">
+          <RiOrganizationChart className="empty-icon" />
+          <h3>No resources found yet</h3>
+          <p>Resources added by administrators will appear here.</p>
+        </div>
+      )}
+
+      {/* Resource Grid */}
+      {!isLoading && !errorMessage && resources.length > 0 && (
+        <div className="resource-grid">
+          {filteredCategories.map((category) => (
+            <div 
+              className="resource-category-card" 
+              key={category.type}
+              style={{ borderTop: `4px solid ${category.borderColor}` }}
+            >
+              <div
+                className="category-header"
+                style={{ backgroundColor: category.headerColor }}
+              >
+                <div className="category-icon">{category.icon}</div>
+                <div className="category-title-group">
+                  <h3>{category.title}</h3>
+                  <span className="category-count">{category.items.length} items</span>
+                </div>
+              </div>
+
+              <div className="category-items-list">
+                {category.items.map((item) => (
+                  <div className="resource-item-row" key={item.id}>
+                    <div className="item-info">
+                      <div className="item-name-row">
+                        <h4>{item.name}</h4>
+                        <span className={`status-badge ${item.status?.toLowerCase()}`}>
+                          {item.status === 'ACTIVE' ? (
+                            <><FaCheckCircle /> Active</>
+                          ) : item.status === 'OUT_OF_SERVICE' ? (
+                            <><FaExclamationTriangle /> Out of Service</>
+                          ) : (
+                            item.status
+                          )}
+                        </span>
+                      </div>
+                      <span className="item-location">
+                        <FaMapMarkerAlt className="pin-icon" /> {item.location}
+                      </span>
+                      <span className="item-availability">
+                        🕐 {item.availabilityWindows}
+                      </span>
+                    </div>
+                    <div className="item-action">
+                      <div className="item-capacity">
+                        <span className="capacity-value">{item.capacity}</span>
+                        <span className="capacity-label">Capacity</span>
+                      </div>
+                      <button 
+                        className="btn-allocate-small"
+                        disabled={item.status !== 'ACTIVE'}
+                      >
+                        <MdArrowForward /> Allocate
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Allocation Log Section */}
       <div className="resource-log-preview">
-        <h3><RiOrganizationChart /> Resource Allocation Log</h3>
+        <h3><RiOrganizationChart /> Recent Allocations</h3>
+        <p className="log-placeholder">Allocation history will appear here when bookings are made.</p>
       </div>
     </div>
   );

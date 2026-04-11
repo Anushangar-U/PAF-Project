@@ -7,6 +7,7 @@ import {
 import { MdOutlineComputer } from 'react-icons/md';
 import { BsCpuFill } from 'react-icons/bs';
 import { RiOrganizationChart } from 'react-icons/ri';
+import ResourceHub from './ResourceHub';
 import './Dashboard.css';
 
 // Import images of faculties
@@ -16,28 +17,6 @@ import FoaImg from '../images/FOA.jpg';
 import FobImg from '../images/FOB.jpg';
 import FhssImg from '../images/FHSS.jpg';
 import GsrImg from '../images/GSR.jpg';
-
-// Default fallback image for resource hub (use one of your existing images)
-// If you don't have these specific images, use the faculty images as fallback
-const getResourceImage = (facultyId) => {
-  // Return the faculty image as fallback if specific resource images don't exist
-  switch(facultyId) {
-    case 'FOA':
-      return FoaImg;
-    case 'FOB':
-      return FobImg;
-    case 'FOC':
-      return FocImg;
-    case 'FOE':
-      return FoeImg;
-    case 'FHSS':
-      return FhssImg;
-    case 'GSR':
-      return GsrImg;
-    default:
-      return FocImg;
-  }
-};
 
 const facultiesData = [
   {
@@ -57,15 +36,6 @@ const facultiesData = [
     departments: ['Computer Science', 'Information Technology', 'Data Science', 'Software Engineering'],
     description: 'The Faculty of Computing offers cutting-edge programs in computer science, IT, and emerging technologies. Our state-of-the-art labs and experienced faculty prepare students for careers in the digital economy.',
     officeHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
-    resources: {
-      lectureHalls: 8,
-      computerLabs: 12,
-      pcs: 450,
-      libraryBooks: 18000,
-      researchCenters: 4,
-      studentLounges: 2,
-      conferenceRooms: 5
-    }
   },
   {
     id: 'FOE',
@@ -84,15 +54,6 @@ const facultiesData = [
     departments: ['Civil Engineering', 'Mechanical Engineering', 'Electrical Engineering', 'Chemical Engineering'],
     description: 'The Faculty of Engineering provides world-class education in various engineering disciplines. Students gain hands-on experience through modern laboratories and industry partnerships.',
     officeHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
-    resources: {
-      lectureHalls: 15,
-      computerLabs: 10,
-      pcs: 380,
-      libraryBooks: 25000,
-      researchCenters: 8,
-      studentLounges: 3,
-      conferenceRooms: 7
-    }
   },
   {
     id: 'FOB',
@@ -111,15 +72,6 @@ const facultiesData = [
     departments: ['Marketing', 'Finance', 'Management', 'Entrepreneurship'],
     description: 'The Faculty of Business develops future business leaders through innovative programs, case studies, and real-world projects. Our graduates are sought after by top companies.',
     officeHours: 'Mon-Fri: 8:30 AM - 5:30 PM',
-    resources: {
-      lectureHalls: 10,
-      computerLabs: 6,
-      pcs: 200,
-      libraryBooks: 15000,
-      researchCenters: 3,
-      studentLounges: 2,
-      conferenceRooms: 6
-    }
   },
   {
     id: 'FOA',
@@ -138,15 +90,6 @@ const facultiesData = [
     departments: ['Architecture', 'Urban Planning', 'Landscape Design'],
     description: 'The Faculty of Architecture combines creative design with technical excellence. Students work in modern studios and participate in design competitions.',
     officeHours: 'Mon-Fri: 9:00 AM - 6:00 PM',
-    resources: {
-      lectureHalls: 6,
-      computerLabs: 5,
-      pcs: 150,
-      libraryBooks: 8000,
-      researchCenters: 2,
-      studentLounges: 1,
-      conferenceRooms: 3
-    }
   },
   {
     id: 'FHSS',
@@ -165,15 +108,6 @@ const facultiesData = [
     departments: ['Psychology', 'Sociology', 'Political Science', 'International Relations'],
     description: 'The Faculty of Human Studies explores human behavior, societies, and cultures. Our interdisciplinary approach prepares students for diverse careers.',
     officeHours: 'Mon-Fri: 8:30 AM - 5:00 PM',
-    resources: {
-      lectureHalls: 12,
-      computerLabs: 4,
-      pcs: 120,
-      libraryBooks: 20000,
-      researchCenters: 3,
-      studentLounges: 2,
-      conferenceRooms: 4
-    }
   },
   {
     id: 'GSR',
@@ -192,48 +126,21 @@ const facultiesData = [
     departments: ['PhD Programs', 'Masters Programs', 'Research Centers', 'Postdoctoral Fellowships'],
     description: 'Graduate Studies & Research oversees all postgraduate programs and research activities. We support innovation and advanced scholarship across disciplines.',
     officeHours: 'Mon-Fri: 9:00 AM - 7:00 PM',
-    resources: {
-      lectureHalls: 5,
-      computerLabs: 8,
-      pcs: 280,
-      libraryBooks: 35000,
-      researchCenters: 12,
-      studentLounges: 2,
-      conferenceRooms: 8
-    }
   },
 ];
 
-// Resource Hub Modal with faculty-specific data
+// Resource Hub Modal - Now using the actual ResourceHub component
 const ResourceHubModal = ({ faculty, onClose }) => {
-  const res = faculty.resources;
-  
   return (
     <div className="resource-hub-overlay" onClick={onClose}>
-      <div className="resource-hub-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="resource-hub-modal-full" onClick={(e) => e.stopPropagation()}>
         <button className="close-modal" onClick={onClose}>×</button>
-        <h2>Resource Hub - {faculty.title}</h2>
-        <div className="resource-hub-content">
-          <div className="resource-section">
-            <h3>📚 Available Resources</h3>
-            <ul>
-              <li>🏫 Lecture Halls: {res.lectureHalls} rooms</li>
-              <li>💻 Computer Labs: {res.computerLabs} labs ({res.pcs} PCs)</li>
-              <li>📖 Library: {res.libraryBooks.toLocaleString()}+ books</li>
-              <li>🔬 Research Centers: {res.researchCenters} facilities</li>
-              <li>🎓 Student Lounges: {res.studentLounges} areas</li>
-              <li>📊 Conference Rooms: {res.conferenceRooms} spaces</li>
-            </ul>
-          </div>
-          <div className="resource-section">
-            <h3>⏰ Booking Availability</h3>
-            <ul>
-              <li>🟢 Today: {Math.floor(Math.random() * 30) + 60}% available</li>
-              <li>🟡 Tomorrow: {Math.floor(Math.random() * 20) + 75}% available</li>
-              <li>🔴 Peak hours: 2-4 PM (limited)</li>
-            </ul>
-            <button className="book-now-btn">Book a Resource →</button>
-          </div>
+        <div className="modal-header">
+          <h2>Resource Hub - {faculty.title}</h2>
+          <p className="modal-subtitle">Browse and allocate resources for {faculty.title}</p>
+        </div>
+        <div className="resource-hub-embedded">
+          <ResourceHub />
         </div>
       </div>
     </div>
@@ -281,13 +188,13 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
               </div>
             </div>
 
-            {/* Resource Hub Button with Faculty Image (fallback) */}
+            {/* Resource Hub Button with Image */}
             <div className="resource-hub-button-container">
               <button 
                 className="resource-hub-image-btn"
                 onClick={() => setShowResourceHub(true)}
               >
-                <img src={getResourceImage(faculty.id)} alt="Resource Hub" />
+                <img src={faculty.image} alt="Resource Hub" />
                 <div className="btn-overlay">
                   <RiOrganizationChart className="btn-icon" />
                   <span>Access Resource Hub</span>
@@ -382,7 +289,7 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
         </div>
       </div>
 
-      {/* Resource Hub Modal */}
+      {/* Resource Hub Modal - Shows the full ResourceHub component */}
       {showResourceHub && (
         <ResourceHubModal faculty={faculty} onClose={() => setShowResourceHub(false)} />
       )}

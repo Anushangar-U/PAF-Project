@@ -367,7 +367,6 @@ const Dashboard = ({ renderContent }) => {
                   </div>
                   <div className="summary-badge">
                     <span><RiOrganizationChart /> 6 Faculties</span>
-                    <span><FaUsers /> 8,530 Students</span>
                   </div>
                 </header>
 

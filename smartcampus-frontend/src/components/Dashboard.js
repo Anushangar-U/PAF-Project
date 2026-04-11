@@ -18,12 +18,21 @@ import FobImg from '../images/FOB.jpg';
 import FhssImg from '../images/FHSS.jpg';
 import GsrImg from '../images/GSR.jpg';
 
+// Import images for resource hub button (different from faculty photos)
+import FoeRImg from '../images/engineeringEquipments.jpg';
+import FocRImg from '../images/computerResourcce.jpg';
+import FoaRImg from '../images/architectResource.jpg';
+import FobRImg from '../images/businessResource.jpg';
+import FhssRImg from '../images/humanitiesResources.jpg';
+import GsrRImg from '../images/GsrResources.jpg';
+
 const facultiesData = [
   {
     id: 'FOC',
     title: 'Faculty of Computing',
     icon: <MdOutlineComputer className="card-icon" style={{ color: '#38a169' }} />,
     image: FocImg,
+    resourceButtonImage: FocRImg,
     themeColor: '#38a169',
     location: 'Block B, 2nd Floor',
     dean: 'Prof. Sarah Johnson',
@@ -42,6 +51,7 @@ const facultiesData = [
     title: 'Faculty of Engineering',
     icon: <BsCpuFill className="card-icon" style={{ color: '#2b6cb0' }} />,
     image: FoeImg,
+    resourceButtonImage: FoeRImg,
     themeColor: '#2b6cb0',
     location: 'Block C, 1st Floor',
     dean: 'Prof. Michael Chen',
@@ -60,6 +70,7 @@ const facultiesData = [
     title: 'Faculty of Business',
     icon: <FaChartLine className="card-icon" style={{ color: '#dd6b20' }} />,
     image: FobImg,
+    resourceButtonImage: FobRImg,
     themeColor: '#dd6b20',
     location: 'Block A, 3rd Floor',
     dean: 'Prof. David Williams',
@@ -78,6 +89,7 @@ const facultiesData = [
     title: 'Faculty of Architecture',
     icon: <FaDraftingCompass className="card-icon" style={{ color: '#805ad5' }} />,
     image: FoaImg,
+    resourceButtonImage: FoaRImg,
     themeColor: '#805ad5',
     location: 'Block D, 1st Floor',
     dean: 'Prof. Lisa Martinez',
@@ -96,6 +108,7 @@ const facultiesData = [
     title: 'Faculty of Human Studies',
     icon: <FaBookOpen className="card-icon" style={{ color: '#97266d' }} />,
     image: FhssImg,
+    resourceButtonImage: FhssRImg,
     themeColor: '#97266d',
     location: 'Block A, 2nd Floor',
     dean: 'Prof. Emma Thompson',
@@ -114,6 +127,7 @@ const facultiesData = [
     title: 'Graduate Studies & Research',
     icon: <FaGraduationCap className="card-icon" style={{ color: '#2f855a' }} />,
     image: GsrImg,
+    resourceButtonImage: GsrRImg,
     themeColor: '#2f855a',
     location: 'Block E, 4th Floor',
     dean: 'Prof. Robert Anderson',
@@ -188,13 +202,13 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
               </div>
             </div>
 
-            {/* Resource Hub Button with Image */}
+            {/* Resource Hub Button with Faculty-Specific Image */}
             <div className="resource-hub-button-container">
               <button 
                 className="resource-hub-image-btn"
                 onClick={() => setShowResourceHub(true)}
               >
-                <img src={faculty.image} alt="Resource Hub" />
+                <img src={faculty.resourceButtonImage} alt="Resource Hub" />
                 <div className="btn-overlay">
                   <RiOrganizationChart className="btn-icon" />
                   <span>Access Resource Hub</span>

@@ -29,41 +29,41 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    // ✅ CREATE BOOKING (201 Created)
+    //CREATE BOOKING (201 Created)
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Booking createBooking(@RequestBody Booking booking) {
         return bookingService.createBooking(booking);
     }
 
-    // ✅ GET BOOKINGS BY USER
+    //GET BOOKINGS BY USER
     @GetMapping("/user/{userId}")
     public List<Booking> getMyBookings(@PathVariable Long userId) {
         return bookingService.getMyBookings(userId);
     }
 
-    // ✅ GET ALL BOOKINGS
+    //GET ALL BOOKINGS
     @GetMapping
     public List<Booking> getAllBookings() {
         return bookingService.getAllBookings();
     }
 
-    // ✅ APPROVE BOOKING
+    //APPROVE BOOKING
     @PutMapping("/{id}/approve")
-    public Booking approveBooking(@PathVariable Long id) {
+    public Booking approveBooking(@PathVariable String id) {
         return bookingService.approveBooking(id);
     }
 
-    // ✅ REJECT BOOKING
+    //REJECT BOOKING
     @PutMapping("/{id}/reject")
-    public Booking rejectBooking(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public Booking rejectBooking(@PathVariable String id, @RequestBody Map<String, String> body) {
         String reason = body.get("reason");
         return bookingService.rejectBooking(id, reason);
     }
 
-    // ✅ CANCEL BOOKING
+    //CANCEL BOOKING
     @PatchMapping("/{id}/cancel")
-    public Booking cancelBooking(@PathVariable Long id) {
+    public Booking cancelBooking(@PathVariable String id) {
         return bookingService.cancelBooking(id);
     }
 }

@@ -18,7 +18,7 @@ public class MongoConfig {
         if (!StringUtils.hasText(mongoUri)) {
             throw new IllegalStateException("MongoDB URI is missing. Set spring.data.mongodb.uri or MONGODB_URI.");
         }
-        return new SimpleMongoClientDatabaseFactory(mongoUri);
+        return new SimpleMongoClientDatabaseFactory(new ConnectionString(mongoUri));
     }
 
     @Bean

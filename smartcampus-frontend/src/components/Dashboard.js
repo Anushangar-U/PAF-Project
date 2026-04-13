@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { 
   FaUniversity, FaChartLine, FaDraftingCompass, FaBookOpen, FaGraduationCap,
   FaChalkboardTeacher, FaUsers, FaSearch, FaArrowLeft, FaEnvelope, FaPhone,
-  FaGlobe, FaCalendarAlt, FaClock, FaUserTie, FaMapMarkerAlt, FaUserFriends
+  FaGlobe, FaCalendarAlt, FaClock, FaUserTie, FaMapMarkerAlt, FaUserFriends,
+  FaEye, FaInfoCircle, FaBuilding, FaBook, FaFlask, FaLaptop, FaMicroscope,
+  FaCertificate, FaChalkboard, FaClipboardList
 } from 'react-icons/fa';
 import { MdOutlineComputer } from 'react-icons/md';
 import { BsCpuFill } from 'react-icons/bs';
@@ -18,7 +20,7 @@ import FobImg from '../images/FOB.jpg';
 import FhssImg from '../images/FHSS.jpg';
 import GsrImg from '../images/GSR.jpg';
 
-// Import images for resource hub button (different from faculty photos)
+// Import images for resource hub button
 import FoeRImg from '../images/engineeringEquipments.jpg';
 import FocRImg from '../images/computerResourcce.jpg';
 import FoaRImg from '../images/architectResource.jpg';
@@ -42,7 +44,16 @@ const facultiesData = [
     established: 2005,
     students: 1240,
     staff: 85,
-    departments: ['Computer Science', 'Information Technology', 'Data Science', 'Software Engineering'],
+    departments: ['Computer Science', 'Information Technology', 'Data Science', 'Software Engineering', 'Cyber Security'],
+    degreePrograms: [
+      { name: 'B.Sc. Computer Science', duration: '4 Years', credits: 120 },
+      { name: 'B.Sc. Information Technology', duration: '4 Years', credits: 120 },
+      { name: 'M.Sc. Data Science', duration: '2 Years', credits: 60 },
+      { name: 'M.Sc. Cyber Security', duration: '2 Years', credits: 60 },
+      { name: 'PhD in Computing', duration: '3-5 Years', credits: 'Research Based' }
+    ],
+    researchAreas: ['Artificial Intelligence', 'Machine Learning', 'Cloud Computing', 'Blockchain', 'IoT', 'Cyber Security'],
+    facilities: ['AI Research Lab', 'Data Science Center', 'Software Development Lab', 'Networking Lab', 'Cloud Computing Lab'],
     description: 'The Faculty of Computing offers cutting-edge programs in computer science, IT, and emerging technologies. Our state-of-the-art labs and experienced faculty prepare students for careers in the digital economy.',
     officeHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
   },
@@ -61,7 +72,16 @@ const facultiesData = [
     established: 2000,
     students: 1850,
     staff: 120,
-    departments: ['Civil Engineering', 'Mechanical Engineering', 'Electrical Engineering', 'Chemical Engineering'],
+    departments: ['Civil Engineering', 'Mechanical Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Biomedical Engineering'],
+    degreePrograms: [
+      { name: 'B.Sc. Civil Engineering', duration: '4 Years', credits: 130 },
+      { name: 'B.Sc. Mechanical Engineering', duration: '4 Years', credits: 130 },
+      { name: 'B.Sc. Electrical Engineering', duration: '4 Years', credits: 130 },
+      { name: 'M.Eng. Structural Engineering', duration: '2 Years', credits: 65 },
+      { name: 'PhD in Engineering', duration: '3-5 Years', credits: 'Research Based' }
+    ],
+    researchAreas: ['Renewable Energy', 'Robotics', 'Structural Design', 'Materials Science', 'Environmental Engineering'],
+    facilities: ['Robotics Lab', 'Materials Testing Lab', 'CAD/CAM Center', 'Electrical Workshop', 'Hydraulics Lab'],
     description: 'The Faculty of Engineering provides world-class education in various engineering disciplines. Students gain hands-on experience through modern laboratories and industry partnerships.',
     officeHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
   },
@@ -80,7 +100,16 @@ const facultiesData = [
     established: 1998,
     students: 2100,
     staff: 95,
-    departments: ['Marketing', 'Finance', 'Management', 'Entrepreneurship'],
+    departments: ['Marketing', 'Finance', 'Management', 'Entrepreneurship', 'International Business'],
+    degreePrograms: [
+      { name: 'BBA - Marketing', duration: '4 Years', credits: 120 },
+      { name: 'BBA - Finance', duration: '4 Years', credits: 120 },
+      { name: 'MBA', duration: '2 Years', credits: 60 },
+      { name: 'Executive MBA', duration: '18 Months', credits: 55 },
+      { name: 'PhD in Management', duration: '3-5 Years', credits: 'Research Based' }
+    ],
+    researchAreas: ['Digital Marketing', 'Financial Analytics', 'Supply Chain', 'Organizational Behavior', 'Business Strategy'],
+    facilities: ['Trading Floor', 'Business Simulation Lab', 'Entrepreneurship Center', 'Case Study Library', 'Board Room'],
     description: 'The Faculty of Business develops future business leaders through innovative programs, case studies, and real-world projects. Our graduates are sought after by top companies.',
     officeHours: 'Mon-Fri: 8:30 AM - 5:30 PM',
   },
@@ -99,7 +128,15 @@ const facultiesData = [
     established: 2010,
     students: 890,
     staff: 45,
-    departments: ['Architecture', 'Urban Planning', 'Landscape Design'],
+    departments: ['Architecture', 'Urban Planning', 'Landscape Design', 'Interior Design', 'Construction Management'],
+    degreePrograms: [
+      { name: 'B.Arch Architecture', duration: '5 Years', credits: 160 },
+      { name: 'B.Sc. Urban Planning', duration: '4 Years', credits: 120 },
+      { name: 'M.Arch Sustainable Design', duration: '2 Years', credits: 65 },
+      { name: 'M.Sc. Landscape Architecture', duration: '2 Years', credits: 60 }
+    ],
+    researchAreas: ['Sustainable Architecture', 'Smart Cities', 'Heritage Conservation', 'Urban Design', 'Building Information Modeling'],
+    facilities: ['Design Studios', 'Model Making Workshop', 'Digital Fabrication Lab', 'Architecture Library', 'Exhibition Hall'],
     description: 'The Faculty of Architecture combines creative design with technical excellence. Students work in modern studios and participate in design competitions.',
     officeHours: 'Mon-Fri: 9:00 AM - 6:00 PM',
   },
@@ -118,7 +155,16 @@ const facultiesData = [
     established: 2003,
     students: 1560,
     staff: 110,
-    departments: ['Psychology', 'Sociology', 'Political Science', 'International Relations'],
+    departments: ['Psychology', 'Sociology', 'Political Science', 'International Relations', 'Economics'],
+    degreePrograms: [
+      { name: 'B.A. Psychology', duration: '3 Years', credits: 90 },
+      { name: 'B.A. Sociology', duration: '3 Years', credits: 90 },
+      { name: 'B.A. Political Science', duration: '3 Years', credits: 90 },
+      { name: 'M.A. International Relations', duration: '2 Years', credits: 60 },
+      { name: 'PhD in Social Sciences', duration: '3-5 Years', credits: 'Research Based' }
+    ],
+    researchAreas: ['Behavioral Psychology', 'Social Justice', 'Global Politics', 'Cultural Studies', 'Economic Development'],
+    facilities: ['Psychology Lab', 'Social Research Center', 'Debate Hall', 'Language Lab', 'International Affairs Forum'],
     description: 'The Faculty of Human Studies explores human behavior, societies, and cultures. Our interdisciplinary approach prepares students for diverse careers.',
     officeHours: 'Mon-Fri: 8:30 AM - 5:00 PM',
   },
@@ -137,13 +183,157 @@ const facultiesData = [
     established: 2012,
     students: 890,
     staff: 60,
-    departments: ['PhD Programs', 'Masters Programs', 'Research Centers', 'Postdoctoral Fellowships'],
+    departments: ['PhD Programs', 'Masters Programs', 'Research Centers', 'Postdoctoral Fellowships', 'International Collaborations'],
+    degreePrograms: [
+      { name: 'Master of Philosophy (MPhil)', duration: '2 Years', credits: 'Research Based' },
+      { name: 'Doctor of Philosophy (PhD)', duration: '3-5 Years', credits: 'Research Based' },
+      { name: 'Postdoctoral Fellowship', duration: '1-2 Years', credits: 'Research' },
+      { name: 'Professional Doctorate', duration: '3-4 Years', credits: 'Research Based' }
+    ],
+    researchAreas: ['Interdisciplinary Research', 'Innovation Studies', 'Research Ethics', 'Scientific Writing', 'Grant Management'],
+    facilities: ['Research Centers', 'Conference Halls', 'Publication Support Office', 'Ethics Committee Office', 'Collaboration Hub'],
     description: 'Graduate Studies & Research oversees all postgraduate programs and research activities. We support innovation and advanced scholarship across disciplines.',
     officeHours: 'Mon-Fri: 9:00 AM - 7:00 PM',
   },
 ];
 
-// Resource Hub Modal - Now using the actual ResourceHub component
+// Sidebar Navigation Component
+const SidebarNav = ({ activeSection, onSectionChange, themeColor }) => {
+  const navItems = [
+    { id: 'about', label: 'About', icon: <FaInfoCircle /> },
+    { id: 'departments', label: 'Departments', icon: <FaBuilding /> },
+    { id: 'degrees', label: 'Degree Programs', icon: <FaGraduationCap /> },
+    { id: 'research', label: 'Research Areas', icon: <FaFlask /> },
+    { id: 'facilities', label: 'Facilities', icon: <FaLaptop /> },
+  ];
+
+  return (
+    <div className="info-sidebar-nav" style={{ '--theme-color': themeColor }}>
+      <h3>Explore</h3>
+      {navItems.map((item) => (
+        <div
+          key={item.id}
+          className={`sidebar-nav-item ${activeSection === item.id ? 'active' : ''}`}
+          onClick={() => onSectionChange(item.id)}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Main Content Area that changes based on selected section
+const MainContent = ({ faculty, activeSection }) => {
+  switch(activeSection) {
+    case 'about':
+      return (
+        <div className="content-section">
+          <h3>About {faculty.title}</h3>
+          <div className="about-content">
+            <p>{faculty.description}</p>
+            <div className="about-stats">
+              <div className="about-stat">
+                <FaCalendarAlt />
+                <div>
+                  <strong>Established</strong>
+                  <p>{faculty.established}</p>
+                </div>
+              </div>
+              <div className="about-stat">
+                <FaClock />
+                <div>
+                  <strong>Office Hours</strong>
+                  <p>{faculty.officeHours}</p>
+                </div>
+              </div>
+              <div className="about-stat">
+                <FaUsers />
+                <div>
+                  <strong>Total Enrollment</strong>
+                  <p>{faculty.students} students</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    
+    case 'departments':
+      return (
+        <div className="content-section">
+          <h3>Departments</h3>
+          <div className="departments-grid">
+            {faculty.departments.map((dept, index) => (
+              <div key={index} className="department-card">
+                <FaBuilding className="dept-icon" />
+                <span>{dept}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'degrees':
+      return (
+        <div className="content-section">
+          <h3>Degree Programs</h3>
+          <div className="degrees-list">
+            {faculty.degreePrograms.map((program, index) => (
+              <div key={index} className="degree-card">
+                <div className="degree-icon">
+                  <FaGraduationCap />
+                </div>
+                <div className="degree-details">
+                  <h4>{program.name}</h4>
+                  <div className="degree-meta">
+                    <span><FaClock /> {program.duration}</span>
+                    <span><FaCertificate /> {program.credits} credits</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'research':
+      return (
+        <div className="content-section">
+          <h3>Research Areas</h3>
+          <div className="research-grid">
+            {faculty.researchAreas.map((area, index) => (
+              <div key={index} className="research-tag">
+                <FaMicroscope className="research-icon" />
+                <span>{area}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'facilities':
+      return (
+        <div className="content-section">
+          <h3>Facilities</h3>
+          <div className="facilities-grid">
+            {faculty.facilities.map((facility, index) => (
+              <div key={index} className="facility-card">
+                <FaLaptop className="facility-icon" />
+                <span>{facility}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    default:
+      return null;
+  }
+};
+
+// Resource Hub Modal
 const ResourceHubModal = ({ faculty, onClose }) => {
   return (
     <div className="resource-hub-overlay" onClick={onClose}>
@@ -164,6 +354,15 @@ const ResourceHubModal = ({ faculty, onClose }) => {
 // Faculty Info Page Component
 const FacultyInfoPage = ({ faculty, onBack }) => {
   const [showResourceHub, setShowResourceHub] = useState(false);
+  const [activeSection, setActiveSection] = useState('about');
+
+  const handleViewStudents = () => {
+    alert(`Viewing ${faculty.students} students in ${faculty.title}`);
+  };
+
+  const handleViewStaff = () => {
+    alert(`Viewing ${faculty.staff} staff members in ${faculty.title}`);
+  };
 
   return (
     <>
@@ -182,27 +381,55 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
           </div>
         </div>
 
-        <div className="faculty-info-grid">
-          <div className="info-main">
+        <div className="faculty-info-layout">
+          {/* Sidebar Navigation */}
+          <SidebarNav 
+            activeSection={activeSection} 
+            onSectionChange={setActiveSection}
+            themeColor={faculty.themeColor}
+          />
+
+          {/* Main Content Area */}
+          <div className="info-main-area">
             <div className="info-image">
               <img src={faculty.image} alt={faculty.title} />
             </div>
-            
-            <div className="info-description">
-              <h3>About</h3>
-              <p>{faculty.description}</p>
-            </div>
 
-            <div className="info-departments">
-              <h3>Departments</h3>
-              <div className="departments-list">
-                {faculty.departments.map((dept, index) => (
-                  <span key={index} className="dept-tag">{dept}</span>
-                ))}
+            {/* Dynamic Content Section */}
+            <MainContent faculty={faculty} activeSection={activeSection} />
+
+            {/* Quick Stats with View buttons */}
+            <div className="quick-stats-section">
+              <h3>Quick Stats</h3>
+              <div className="stats-grid">
+                <div className="stat-card-horizontal">
+                  <div className="stat-icon">
+                    <FaUsers />
+                  </div>
+                  <div className="stat-details">
+                    <div className="stat-number">{faculty.students}</div>
+                    <div className="stat-label">Current Students</div>
+                  </div>
+                  <button className="view-btn" onClick={handleViewStudents}>
+                    <FaEye /> View
+                  </button>
+                </div>
+                <div className="stat-card-horizontal">
+                  <div className="stat-icon">
+                    <FaUserFriends />
+                  </div>
+                  <div className="stat-details">
+                    <div className="stat-number">{faculty.staff}</div>
+                    <div className="stat-label">Staff Members</div>
+                  </div>
+                  <button className="view-btn" onClick={handleViewStaff}>
+                    <FaEye /> View
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Resource Hub Button with Faculty-Specific Image */}
+            {/* Resource Hub Button */}
             <div className="resource-hub-button-container">
               <button 
                 className="resource-hub-image-btn"
@@ -217,6 +444,7 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
             </div>
           </div>
 
+          {/* Right Sidebar - Contact Info */}
           <div className="info-sidebar">
             <div className="info-card">
               <h3>Contact Information</h3>
@@ -251,51 +479,12 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
             </div>
 
             <div className="info-card">
-              <h3>Location & Hours</h3>
+              <h3>Location</h3>
               <div className="info-detail">
                 <FaMapMarkerAlt className="detail-icon" />
                 <div>
-                  <strong>Location</strong>
+                  <strong>Campus Location</strong>
                   <p>{faculty.location}</p>
-                </div>
-              </div>
-              <div className="info-detail">
-                <FaClock className="detail-icon" />
-                <div>
-                  <strong>Office Hours</strong>
-                  <p>{faculty.officeHours}</p>
-                </div>
-              </div>
-              <div className="info-detail">
-                <FaCalendarAlt className="detail-icon" />
-                <div>
-                  <strong>Established</strong>
-                  <p>{faculty.established}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="info-card stats-card">
-              <h3>Quick Stats</h3>
-              <div className="stat-item-large">
-                <FaUsers />
-                <div>
-                  <strong>{faculty.students}</strong>
-                  <p>Current Students</p>
-                </div>
-              </div>
-              <div className="stat-item-large">
-                <FaUserFriends />
-                <div>
-                  <strong>{faculty.staff}</strong>
-                  <p>Staff Members</p>
-                </div>
-              </div>
-              <div className="stat-item-large">
-                <RiOrganizationChart />
-                <div>
-                  <strong>{faculty.departments.length}</strong>
-                  <p>Departments</p>
                 </div>
               </div>
             </div>
@@ -303,7 +492,7 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
         </div>
       </div>
 
-      {/* Resource Hub Modal - Shows the full ResourceHub component */}
+      {/* Resource Hub Modal */}
       {showResourceHub && (
         <ResourceHubModal faculty={faculty} onClose={() => setShowResourceHub(false)} />
       )}
@@ -329,7 +518,6 @@ const Dashboard = ({ renderContent }) => {
     setSelectedFaculty(null);
   };
 
-  // Show faculty info page if a faculty is selected
   if (selectedFaculty) {
     return (
       <div className="dashboard-container">
@@ -348,7 +536,6 @@ const Dashboard = ({ renderContent }) => {
 
   return (
     <div className="dashboard-container">
-      {/* Top Navigation Bar - Only Faculties Tab Now */}
       <nav className="top-navbar">
         <div className="nav-brand">
           <FaUniversity className="nav-logo" />
@@ -365,7 +552,6 @@ const Dashboard = ({ renderContent }) => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="main-content">
         {!renderContent ? (
           <>
@@ -384,7 +570,6 @@ const Dashboard = ({ renderContent }) => {
                   </div>
                 </header>
 
-                {/* Search Bar */}
                 <div className="search-bar">
                   <FaSearch className="search-icon" />
                   <input

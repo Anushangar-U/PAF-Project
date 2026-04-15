@@ -47,7 +47,7 @@ const CATEGORY_CONFIG = {
   }
 };
 
-const ResourceHub = () => {
+const ResourceHub = ({ facultyId, facultyName }) => {
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -60,9 +60,24 @@ const ResourceHub = () => {
     const fetchResources = async () => {
       try {
         setIsLoading(true);
-        const response = await ResourceService.getAllResources();
+        let response;
+        
+        if (facultyId) {
+          // Use the faculty-specific endpoint
+          console.log(`Fetching resources for faculty ID: ${facultyId}`);
+          response = await ResourceService.getResourcesByFacultyId(facultyId);
+          console.log('API Response for faculty:', response);
+        } else {
+          // Get all resources
+          response = await ResourceService.getAllResources();
+          console.log('API Response all resources:', response);
+        }
+        
         if (isMounted) {
-          setResources(Array.isArray(response.data) ? response.data : []);
+          let fetchedResources = Array.isArray(response.data) ? response.data : [];
+          console.log('Fetched resources count:', fetchedResources.length);
+          console.log('Fetched resources:', fetchedResources);
+          setResources(fetchedResources);
           setErrorMessage('');
         }
       } catch (error) {
@@ -79,7 +94,7 @@ const ResourceHub = () => {
 
     fetchResources();
     return () => { isMounted = false; };
-  }, []);
+  }, [facultyId]);
 
   // Group resources by type
   const resourceCategories = useMemo(() => {
@@ -135,13 +150,18 @@ const ResourceHub = () => {
 
   return (
     <div className="resource-hub-container">
-      {/* Header */}
+      {/* Header with Faculty Info */}
       <header className="top-bar">
         <div className="page-header-info">
           <div className="page-title">
             <RiOrganizationChart className="page-title-icon" />
             <h1>Resource Hub</h1>
           </div>
+          {facultyName && (
+            <p className="page-subtitle">
+              Showing resources for <strong>{facultyName}</strong> (ID: {facultyId})
+            </p>
+          )}
           <p className="page-subtitle">Browse and allocate campus resources</p>
         </div>
         
@@ -163,22 +183,24 @@ const ResourceHub = () => {
       </header>
 
       {/* Filter Bar */}
-      <div className="filter-bar">
-        <label htmlFor="type-filter">Filter by Type:</label>
-        <select 
-          id="type-filter"
-          value={selectedType} 
-          onChange={(e) => setSelectedType(e.target.value)}
-          className="type-filter"
-        >
-          {resourceTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-        <span className="filter-count">
-          Showing {filteredCategories.reduce((sum, cat) => sum + cat.items.length, 0)} resources
-        </span>
-      </div>
+      {resources.length > 0 && (
+        <div className="filter-bar">
+          <label htmlFor="type-filter">Filter by Type:</label>
+          <select 
+            id="type-filter"
+            value={selectedType} 
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="type-filter"
+          >
+            {resourceTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <span className="filter-count">
+            Showing {filteredCategories.reduce((sum, cat) => sum + cat.items.length, 0)} resources
+          </span>
+        </div>
+      )}
 
       {/* Loading State */}
       {isLoading && (
@@ -200,8 +222,8 @@ const ResourceHub = () => {
       {!isLoading && !errorMessage && resources.length === 0 && (
         <div className="empty-container">
           <RiOrganizationChart className="empty-icon" />
-          <h3>No resources found yet</h3>
-          <p>Resources added by administrators will appear here.</p>
+          <h3>No resources found for {facultyName || 'this faculty'}</h3>
+          <p>Resources added by administrators for this faculty will appear here.</p>
         </div>
       )}
 

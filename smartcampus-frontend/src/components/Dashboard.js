@@ -3,8 +3,8 @@ import {
   FaUniversity, FaChartLine, FaDraftingCompass, FaBookOpen, FaGraduationCap,
   FaChalkboardTeacher, FaUsers, FaSearch, FaArrowLeft, FaEnvelope, FaPhone,
   FaGlobe, FaCalendarAlt, FaClock, FaUserTie, FaMapMarkerAlt, FaUserFriends,
-  FaEye, FaInfoCircle, FaBuilding, FaBook, FaFlask, FaLaptop, FaMicroscope,
-  FaCertificate, FaChalkboard, FaClipboardList
+  FaEye, FaInfoCircle, FaBuilding, FaFlask, FaLaptop, FaMicroscope,
+  FaCertificate
 } from 'react-icons/fa';
 import { MdOutlineComputer } from 'react-icons/md';
 import { BsCpuFill } from 'react-icons/bs';
@@ -36,6 +36,7 @@ const facultiesData = [
     image: FocImg,
     resourceButtonImage: FocRImg,
     themeColor: '#38a169',
+    themeColorLight: '#e6fffa',
     location: 'Block B, 2nd Floor',
     dean: 'Prof. Sarah Johnson',
     email: 'foc@campusmart.edu',
@@ -64,6 +65,7 @@ const facultiesData = [
     image: FoeImg,
     resourceButtonImage: FoeRImg,
     themeColor: '#2b6cb0',
+    themeColorLight: '#ebf8ff',
     location: 'Block C, 1st Floor',
     dean: 'Prof. Michael Chen',
     email: 'foe@campusmart.edu',
@@ -92,6 +94,7 @@ const facultiesData = [
     image: FobImg,
     resourceButtonImage: FobRImg,
     themeColor: '#dd6b20',
+    themeColorLight: '#fffaf0',
     location: 'Block A, 3rd Floor',
     dean: 'Prof. David Williams',
     email: 'fob@campusmart.edu',
@@ -120,6 +123,7 @@ const facultiesData = [
     image: FoaImg,
     resourceButtonImage: FoaRImg,
     themeColor: '#805ad5',
+    themeColorLight: '#faf5ff',
     location: 'Block D, 1st Floor',
     dean: 'Prof. Lisa Martinez',
     email: 'foa@campusmart.edu',
@@ -147,6 +151,7 @@ const facultiesData = [
     image: FhssImg,
     resourceButtonImage: FhssRImg,
     themeColor: '#97266d',
+    themeColorLight: '#fff5f5',
     location: 'Block A, 2nd Floor',
     dean: 'Prof. Emma Thompson',
     email: 'fhss@campusmart.edu',
@@ -175,6 +180,7 @@ const facultiesData = [
     image: GsrImg,
     resourceButtonImage: GsrRImg,
     themeColor: '#2f855a',
+    themeColorLight: '#f0fff4',
     location: 'Block E, 4th Floor',
     dean: 'Prof. Robert Anderson',
     email: 'gsr@campusmart.edu',
@@ -209,7 +215,7 @@ const SidebarNav = ({ activeSection, onSectionChange, themeColor }) => {
 
   return (
     <div className="info-sidebar-nav" style={{ '--theme-color': themeColor }}>
-      <h3>Explore</h3>
+      <h3>Explore Faculty</h3>
       {navItems.map((item) => (
         <div
           key={item.id}
@@ -333,18 +339,18 @@ const MainContent = ({ faculty, activeSection }) => {
   }
 };
 
-// Resource Hub Modal
+// Resource Hub Modal - Pass faculty info for filtering
 const ResourceHubModal = ({ faculty, onClose }) => {
   return (
     <div className="resource-hub-overlay" onClick={onClose}>
       <div className="resource-hub-modal-full" onClick={(e) => e.stopPropagation()}>
         <button className="close-modal" onClick={onClose}>×</button>
-        <div className="modal-header">
-          <h2>Resource Hub - {faculty.title}</h2>
+        <div className="modal-header" style={{ borderBottomColor: faculty.themeColor }}>
+          <h2 style={{ color: faculty.themeColor }}>Resource Hub - {faculty.title}</h2>
           <p className="modal-subtitle">Browse and allocate resources for {faculty.title}</p>
         </div>
         <div className="resource-hub-embedded">
-          <ResourceHub />
+          <ResourceHub facultyId={faculty.id} facultyName={faculty.title} />
         </div>
       </div>
     </div>

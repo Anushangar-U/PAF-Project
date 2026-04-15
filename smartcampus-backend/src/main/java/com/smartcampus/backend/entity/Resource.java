@@ -22,4 +22,8 @@ public class Resource {
     private String availabilityWindows; 
 
     private String status; 
+
+    private String facultyId;
+    
+    private String facultyName;
 }

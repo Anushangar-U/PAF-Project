@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "SmartCampus – Module C REST API",
+    "description": "All Module C endpoints: Tickets, Attachments, Comments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:9090/api" },
+    { "key": "ticketId", "value": "1" },
+    { "key": "commentId", "value": "1" },
+    { "key": "attachmentId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "🎫 Tickets",
+      "item": [
+        {
+          "name": "3.1 Create Ticket (POST)",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/tickets",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title",        "value": "Projector not working", "type": "text" },
+                { "key": "description",  "value": "Screen is blank",        "type": "text" },
+                { "key": "location",     "value": "Lab 3",                  "type": "text" },
+                { "key": "category",     "value": "ELECTRICAL",             "type": "text" },
+                { "key": "priority",     "value": "HIGH",                   "type": "text" },
+                { "key": "contactName",  "value": "Ali Hassan",             "type": "text" },
+                { "key": "contactEmail", "value": "ali@uni.lk",             "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Get All Tickets (GET)",
+          "request": {
+            "method": "GET",
+            "url": "{{base}}/tickets"
+          }
+        },
+        {
+          "name": "3.2 Get Tickets – Filter by Status+Priority (GET)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base}}/tickets?status=OPEN&priority=HIGH",
+              "host": ["{{base}}"],
+              "path": ["tickets"],
+              "query": [
+                { "key": "status",   "value": "OPEN" },
+                { "key": "priority", "value": "HIGH" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.3 Get Ticket by ID (GET)",
+          "request": {
+            "method": "GET",
+            "url": "{{base}}/tickets/{{ticketId}}"
+          }
+        },
+        {
+          "name": "3.4 Update Ticket Status (PATCH) ⭐",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base}}/tickets/{{ticketId}}/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3.5 Assign Technician (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base}}/tickets/{{ticketId}}/assign",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "3.6 Add Resolution Notes (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base}}/tickets/{{ticketId}}/resolve",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resolutionNotes\": \"Replaced HDMI cable and projector lamp.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3.7 Delete Ticket (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base}}/tickets/{{ticketId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📎 Attachments",
+      "item": [
+        {
+          "name": "4.1 Upload Attachments (POST)",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/tickets/{{ticketId}}/attachments",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "files", "type": "file", "src": [] }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.2 Get Attachments for Ticket (GET)",
+          "request": {
+            "method": "GET",
+            "url": "{{base}}/tickets/{{ticketId}}/attachments"
+          }
+        },
+        {
+          "name": "4.3 Delete Attachment (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base}}/attachments/{{attachmentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Comments",
+      "item": [
+        {
+          "name": "5.1 Add Comment – Nested URL (POST) ⭐",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/tickets/{{ticketId}}/comments",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorName\": \"Tech Kamal\",\n  \"authorRole\": \"TECHNICIAN\",\n  \"content\": \"Technician will visit tomorrow morning.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5.2 Get Comments – Nested URL (GET)",
+          "request": {
+            "method": "GET",
+            "url": "{{base}}/tickets/{{ticketId}}/comments"
+          }
+        },
+        {
+          "name": "5.1 Add Comment – Standalone URL (POST)",
+          "request": {
+            "method": "POST",
+            "url": "{{base}}/comments",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticketId\": 1,\n  \"authorName\": \"Admin\",\n  \"authorRole\": \"ADMIN\",\n  \"content\": \"Escalated to electrical team.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5.2 Get Comments – Standalone URL (GET)",
+          "request": {
+            "method": "GET",
+            "url": "{{base}}/comments/ticket/{{ticketId}}"
+          }
+        },
+        {
+          "name": "5.3 Update Comment (PUT) ⭐",
+          "request": {
+            "method": "PUT",
+            "url": "{{base}}/comments/{{commentId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Updated: Technician will arrive at 9 AM.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5.4 Delete Comment (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base}}/comments/{{commentId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

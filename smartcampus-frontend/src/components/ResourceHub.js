@@ -87,6 +87,11 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     return () => { isMounted = false; };
   }, [facultyId]);
 
+  // Handle request resource (for equipment only)
+  const handleRequestResource = (resource) => {
+    alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
+  };
+
   const handleRequestResource = (resource) => {
     alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
   };
@@ -116,6 +121,7 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         capacity: resource.capacity || 0,
         availabilityWindows: resource.availabilityWindows || 'Not specified',
         status: resource.status || 'UNKNOWN',
+        type: resource.type || 'Other',
         type: resource.type || 'Other',
       });
     });
@@ -260,19 +266,12 @@ const ResourceHub = ({ facultyId, facultyName }) => {
                         <span className="capacity-value">{item.capacity}</span>
                         <span className="capacity-label">Capacity</span>
                       </div>
-                      {item.type === 'Equipment' && item.status === 'ACTIVE' && (
-                        <button 
-                          className="btn-request-resource"
-                          onClick={() => handleRequestResource(item)}
-                        >
-                          <FaClipboardList /> Request
-                        </button>
-                      )}
-                      {item.type === 'Equipment' && item.status !== 'ACTIVE' && (
-                        <button className="btn-request-resource disabled" disabled>
-                          <FaClipboardList /> Unavailable
-                        </button>
-                      )}
+                      <button 
+                        className="btn-allocate-small"
+                        disabled={item.status !== 'ACTIVE'}
+                      >
+                        <MdArrowForward /> Allocate
+                      </button>
                     </div>
                   </div>
                 ))}

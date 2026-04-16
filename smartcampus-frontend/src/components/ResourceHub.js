@@ -6,14 +6,13 @@ import {
   FaTools, 
   FaMapMarkerAlt,
   FaCheckCircle,
-  FaExclamationTriangle 
+  FaExclamationTriangle,
+  FaClipboardList
 } from 'react-icons/fa';
 import { RiOrganizationChart } from 'react-icons/ri';
-import { MdArrowForward } from 'react-icons/md';
 import ResourceService from '../services/ResourceService';
 import './ResourceHub.css';
 
-// Category configuration matching your backend types
 const CATEGORY_CONFIG = {
   'Lecture Hall': {
     title: 'Lecture Halls',
@@ -53,7 +52,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedType, setSelectedType] = useState('All');
 
-  // Fetch resources from backend
   useEffect(() => {
     let isMounted = true;
 
@@ -63,20 +61,13 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         let response;
         
         if (facultyId) {
-          // Use the faculty-specific endpoint
-          console.log(`Fetching resources for faculty ID: ${facultyId}`);
           response = await ResourceService.getResourcesByFacultyId(facultyId);
-          console.log('API Response for faculty:', response);
         } else {
-          // Get all resources
           response = await ResourceService.getAllResources();
-          console.log('API Response all resources:', response);
         }
         
         if (isMounted) {
           let fetchedResources = Array.isArray(response.data) ? response.data : [];
-          console.log('Fetched resources count:', fetchedResources.length);
-          console.log('Fetched resources:', fetchedResources);
           setResources(fetchedResources);
           setErrorMessage('');
         }
@@ -96,7 +87,10 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     return () => { isMounted = false; };
   }, [facultyId]);
 
-  // Group resources by type
+  const handleRequestResource = (resource) => {
+    alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
+  };
+
   const resourceCategories = useMemo(() => {
     const grouped = new Map();
 
@@ -122,25 +116,23 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         capacity: resource.capacity || 0,
         availabilityWindows: resource.availabilityWindows || 'Not specified',
         status: resource.status || 'UNKNOWN',
+        type: resource.type || 'Other',
       });
     });
 
     return Array.from(grouped.values());
   }, [resources]);
 
-  // Get unique types for filter dropdown
   const resourceTypes = useMemo(() => {
     const types = ['All', ...new Set(resources.map(r => r.type).filter(Boolean))];
     return types;
   }, [resources]);
 
-  // Filter resources by selected type
   const filteredCategories = useMemo(() => {
     if (selectedType === 'All') return resourceCategories;
     return resourceCategories.filter(cat => cat.type === selectedType);
   }, [resourceCategories, selectedType]);
 
-  // Calculate stats
   const stats = useMemo(() => {
     const total = resources.length;
     const active = resources.filter(r => r.status === 'ACTIVE').length;
@@ -150,7 +142,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
 
   return (
     <div className="resource-hub-container">
-      {/* Header with Faculty Info */}
       <header className="top-bar">
         <div className="page-header-info">
           <div className="page-title">
@@ -159,13 +150,12 @@ const ResourceHub = ({ facultyId, facultyName }) => {
           </div>
           {facultyName && (
             <p className="page-subtitle">
-              Showing resources for <strong>{facultyName}</strong> (ID: {facultyId})
+              Showing resources for <strong>{facultyName}</strong>
             </p>
           )}
-          <p className="page-subtitle">Browse and allocate campus resources</p>
+          <p className="page-subtitle">Browse and request campus resources</p>
         </div>
         
-        {/* Stats Cards */}
         <div className="stats-container">
           <div className="stat-card">
             <span className="stat-value">{stats.total}</span>
@@ -182,7 +172,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       </header>
 
-      {/* Filter Bar */}
       {resources.length > 0 && (
         <div className="filter-bar">
           <label htmlFor="type-filter">Filter by Type:</label>
@@ -202,7 +191,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -210,7 +198,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       )}
 
-      {/* Error State */}
       {!isLoading && errorMessage && (
         <div className="error-container">
           <FaExclamationTriangle className="error-icon" />
@@ -218,7 +205,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       )}
 
-      {/* Empty State */}
       {!isLoading && !errorMessage && resources.length === 0 && (
         <div className="empty-container">
           <RiOrganizationChart className="empty-icon" />
@@ -227,7 +213,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       )}
 
-      {/* Resource Grid */}
       {!isLoading && !errorMessage && resources.length > 0 && (
         <div className="resource-grid">
           {filteredCategories.map((category) => (
@@ -275,12 +260,19 @@ const ResourceHub = ({ facultyId, facultyName }) => {
                         <span className="capacity-value">{item.capacity}</span>
                         <span className="capacity-label">Capacity</span>
                       </div>
-                      <button 
-                        className="btn-allocate-small"
-                        disabled={item.status !== 'ACTIVE'}
-                      >
-                        <MdArrowForward /> Allocate
-                      </button>
+                      {item.type === 'Equipment' && item.status === 'ACTIVE' && (
+                        <button 
+                          className="btn-request-resource"
+                          onClick={() => handleRequestResource(item)}
+                        >
+                          <FaClipboardList /> Request
+                        </button>
+                      )}
+                      {item.type === 'Equipment' && item.status !== 'ACTIVE' && (
+                        <button className="btn-request-resource disabled" disabled>
+                          <FaClipboardList /> Unavailable
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -290,10 +282,9 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         </div>
       )}
 
-      {/* Allocation Log Section */}
       <div className="resource-log-preview">
-        <h3><RiOrganizationChart /> Recent Allocations</h3>
-        <p className="log-placeholder">Allocation history will appear here when bookings are made.</p>
+        <h3><RiOrganizationChart /> Recent Requests</h3>
+        <p className="log-placeholder">Request history will appear here when requests are made.</p>
       </div>
     </div>
   );

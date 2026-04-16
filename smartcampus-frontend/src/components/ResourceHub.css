@@ -311,32 +311,42 @@
   display: block;
 }
 
-.btn-allocate-small {
+/* Request Resource Button - Only for Equipment */
+.btn-request-resource {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #2b6cb0;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #805ad5, #6b46c0);
   color: white;
   border: none;
   border-radius: 20px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.btn-allocate-small:hover:not(:disabled) {
-  background: #1a4a7a;
+.btn-request-resource:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(128, 90, 213, 0.3);
+  background: linear-gradient(135deg, #6b46c0, #553c9a);
 }
 
-.btn-allocate-small:disabled {
+.btn-request-resource.disabled {
   background: #cbd5e0;
   cursor: not-allowed;
+  transform: none;
+  color: #718096;
 }
 
-/* Allocation Log */
+.btn-request-resource.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Request Log Section */
 .resource-log-preview {
   margin-top: 32px;
   padding: 20px;
@@ -392,5 +402,26 @@
   
   .type-filter {
     flex: 1;
+  }
+  
+  .resource-item-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .item-action {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .item-capacity {
+    text-align: left;
+  }
+  
+  .btn-request-resource {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }

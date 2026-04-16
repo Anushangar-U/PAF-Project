@@ -73,6 +73,46 @@
   color: #718096;
 }
 
+/* ============================================ */
+/* ADMIN TOOLBAR - NEW */
+/* ============================================ */
+.admin-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.btn-admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.btn-admin-toggle:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
+}
+
+.btn-admin-toggle.active {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.btn-admin-toggle.active:hover {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+}
+
 /* Filter Bar */
 .filter-bar {
   display: flex;
@@ -311,8 +351,58 @@
   display: block;
 }
 
-/* Request Resource Button - Only for Equipment */
-/* Request Resource Button - Only for Equipment */
+/* ============================================ */
+/* ADMIN ACTIONS (EDIT/DELETE BUTTONS) - NEW */
+/* ============================================ */
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ecc94b;
+  color: #744210;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-edit:hover {
+  background: #d69e2e;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #fc8181;
+  color: #742a2a;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #f56565;
+  transform: translateY(-1px);
+}
+
+/* Request Resource Button - Now for ALL resources */
 .btn-request-resource {
   display: flex;
   align-items: center;
@@ -424,5 +514,19 @@
   .btn-request-resource {
     padding: 6px 12px;
     font-size: 12px;
+  }
+
+  .admin-actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-edit, .btn-delete {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .btn-admin-toggle {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { 
   FaMicrochip, 
   FaChalkboardTeacher, 
@@ -7,11 +7,17 @@ import {
   FaMapMarkerAlt,
   FaCheckCircle,
   FaExclamationTriangle,
-  FaClipboardList
+  FaClipboardList,
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaTimes,
+  FaCalendarCheck
 } from 'react-icons/fa';
 import { RiOrganizationChart } from 'react-icons/ri';
-import { MdArrowForward } from 'react-icons/md';  // ← ADD THIS IMPORT
 import ResourceService from '../services/ResourceService';
+import AddResourceForm from './AddResourceForm';
+import { useAuth } from '../hooks/useAuth';
 import './ResourceHub.css';
 
 const CATEGORY_CONFIG = {
@@ -48,49 +54,65 @@ const CATEGORY_CONFIG = {
 };
 
 const ResourceHub = ({ facultyId, facultyName }) => {
+  const { isAdmin, isLoading: authLoading } = useAuth();
+  
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedType, setSelectedType] = useState('All');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingResource, setEditingResource] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchResources = async () => {
-      try {
-        setIsLoading(true);
-        let response;
-        
-        if (facultyId) {
-          response = await ResourceService.getResourcesByFacultyId(facultyId);
-        } else {
-          response = await ResourceService.getAllResources();
-        }
-        
-        if (isMounted) {
-          let fetchedResources = Array.isArray(response.data) ? response.data : [];
-          setResources(fetchedResources);
-          setErrorMessage('');
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error fetching resources:', error);
-          setErrorMessage('Unable to load resources. Please ensure the backend is running.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+  const fetchResources = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      let response;
+      
+      if (facultyId) {
+        response = await ResourceService.getResourcesByFacultyId(facultyId);
+      } else {
+        response = await ResourceService.getAllResources();
       }
-    };
-
-    fetchResources();
-    return () => { isMounted = false; };
+      
+      let fetchedResources = Array.isArray(response.data) ? response.data : [];
+      setResources(fetchedResources);
+      setErrorMessage('');
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+      setErrorMessage('Unable to load resources. Please ensure the backend is running.');
+    } finally {
+      setIsLoading(false);
+    }
   }, [facultyId]);
 
-  // Handle request resource (for equipment only)
+  useEffect(() => {
+    fetchResources();
+  }, [fetchResources]);
+
+  // Handle requesting ANY resource (not just equipment)
   const handleRequestResource = (resource) => {
-    alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
+    const resourceTypeLabel = resource.type || 'Resource';
+    alert(`📋 Booking Request Submitted\n\nResource: ${resource.name}\nType: ${resourceTypeLabel}\nLocation: ${resource.location}\nCapacity: ${resource.capacity > 0 ? resource.capacity : 'N/A'}\n\nYour booking request has been sent for approval. You will be notified once it's processed.`);
+  };
+
+  // Handle edit resource (Admin only)
+  const handleEditResource = (resource) => {
+    setEditingResource(resource);
+    setShowAddForm(true);
+  };
+
+  // Handle delete resource (Admin only)
+  const handleDeleteResource = async (resourceId, resourceName) => {
+    if (window.confirm(`Are you sure you want to delete "${resourceName}"? This action cannot be undone.`)) {
+      try {
+        await ResourceService.deleteResource(resourceId);
+        alert(`"${resourceName}" has been deleted successfully.`);
+        fetchResources();
+      } catch (error) {
+        console.error('Delete failed:', error);
+        alert('Failed to delete resource. Please try again.');
+      }
+    }
   };
 
   const resourceCategories = useMemo(() => {
@@ -142,8 +164,42 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     return { total, active, outOfService };
   }, [resources]);
 
+  const handleFormSuccess = () => {
+    fetchResources();
+    setShowAddForm(false);
+    setEditingResource(null);
+  };
+
   return (
     <div className="resource-hub-container">
+      {/* Admin Toolbar */}
+      {!authLoading && isAdmin && (
+        <div className="admin-toolbar">
+          <button 
+            className={`btn-admin-toggle ${showAddForm ? 'active' : ''}`}
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              if (!showAddForm) setEditingResource(null);
+            }}
+          >
+            {showAddForm ? (
+              <><FaTimes /> Close Form</>
+            ) : (
+              <><FaPlus /> Add New Resource</>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Add/Edit Resource Form - Admin Only */}
+      {!authLoading && isAdmin && showAddForm && (
+        <AddResourceForm 
+          onResourceAdded={handleFormSuccess}
+          facultyId={facultyId}
+          facultyName={facultyName}
+        />
+      )}
+
       <header className="top-bar">
         <div className="page-header-info">
           <div className="page-title">
@@ -210,8 +266,8 @@ const ResourceHub = ({ facultyId, facultyName }) => {
       {!isLoading && !errorMessage && resources.length === 0 && (
         <div className="empty-container">
           <RiOrganizationChart className="empty-icon" />
-          <h3>No resources found for {facultyName || 'this faculty'}</h3>
-          <p>Resources added by administrators for this faculty will appear here.</p>
+          <h3>No resources found {facultyName ? `for ${facultyName}` : ''}</h3>
+          <p>Resources added by administrators will appear here.</p>
         </div>
       )}
 
@@ -257,26 +313,52 @@ const ResourceHub = ({ facultyId, facultyName }) => {
                         🕐 {item.availabilityWindows}
                       </span>
                     </div>
+                    
                     <div className="item-action">
                       <div className="item-capacity">
-                        <span className="capacity-value">{item.capacity}</span>
+                        <span className="capacity-value">{item.capacity > 0 ? item.capacity : '—'}</span>
                         <span className="capacity-label">Capacity</span>
                       </div>
-                      {/* Show Request button only for Equipment type */}
-                      {item.type === 'Equipment' && item.status === 'ACTIVE' && (
+                      
+                      {/* ADMIN ACTIONS */}
+                      {!authLoading && isAdmin && (
+                        <div className="admin-actions">
+                          <button 
+                            className="btn-edit"
+                            onClick={() => handleEditResource(item)}
+                            title="Edit Resource"
+                          >
+                            <FaEdit /> Edit
+                          </button>
+                          <button 
+                            className="btn-delete"
+                            onClick={() => handleDeleteResource(item.id, item.name)}
+                            title="Delete Resource"
+                          >
+                            <FaTrash /> Delete
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* USER ACTIONS - Request button for ALL active resources */}
+                      {!authLoading && !isAdmin && item.status === 'ACTIVE' && (
                         <button 
                           className="btn-request-resource"
                           onClick={() => handleRequestResource(item)}
+                          title="Request this resource"
                         >
-                          <FaClipboardList /> Request
+                          <FaCalendarCheck /> Request
                         </button>
                       )}
-                      {item.type === 'Equipment' && item.status !== 'ACTIVE' && (
+                      
+                      {/* Unavailable button for OUT_OF_SERVICE resources */}
+                      {!authLoading && !isAdmin && item.status !== 'ACTIVE' && (
                         <button 
                           className="btn-request-resource disabled"
                           disabled
+                          title="This resource is currently unavailable"
                         >
-                          <FaClipboardList /> Unavailable
+                          <FaExclamationTriangle /> Unavailable
                         </button>
                       )}
                     </div>
@@ -289,8 +371,8 @@ const ResourceHub = ({ facultyId, facultyName }) => {
       )}
 
       <div className="resource-log-preview">
-        <h3><RiOrganizationChart /> Recent Requests</h3>
-        <p className="log-placeholder">Request history will appear here when requests are made.</p>
+        <h3><RiOrganizationChart /> Recent Activity</h3>
+        <p className="log-placeholder">Your recent requests and bookings will appear here.</p>
       </div>
     </div>
   );

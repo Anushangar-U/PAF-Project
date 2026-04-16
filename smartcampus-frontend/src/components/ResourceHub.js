@@ -197,6 +197,8 @@ const ResourceHub = ({ facultyId, facultyName }) => {
           onResourceAdded={handleFormSuccess}
           facultyId={facultyId}
           facultyName={facultyName}
+          editResource={editingResource}
+          isEditing={!!editingResource} 
         />
       )}
 

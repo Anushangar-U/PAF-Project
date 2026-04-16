@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ResourceService from '../services/ResourceService';
 import './AddResourceForm.css';
 
-const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
+const AddResourceForm = ({ onResourceAdded, facultyId, facultyName, editResource, isEditing }) => {
     const [formData, setFormData] = useState({
         name: '',
-        type: 'lecture_hall',
+        type: 'Lecture Hall',
         capacity: 0,
         location: '',
         availabilityWindows: '',
@@ -15,6 +15,23 @@ const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Load edit data when editResource changes
+    useEffect(() => {
+        if (editResource && isEditing) {
+            console.log("Loading edit data:", editResource);
+            setFormData({
+                name: editResource.name || '',
+                type: editResource.type || 'Lecture Hall',
+                capacity: editResource.capacity || 0,
+                location: editResource.location || '',
+                availabilityWindows: editResource.availabilityWindows || '',
+                status: editResource.status || 'ACTIVE',
+                facultyId: editResource.facultyId || facultyId || '',
+                facultyName: editResource.facultyName || facultyName || ''
+            });
+        }
+    }, [editResource, isEditing, facultyId, facultyName]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,12 +46,22 @@ const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
         setIsSubmitting(true);
         
         try {
-            await ResourceService.createResource(formData);
-            alert('Resource added successfully!');
+            if (isEditing && editResource?.id) {
+                // UPDATE existing resource
+                console.log("Updating resource:", editResource.id, formData);
+                await ResourceService.updateResource(editResource.id, formData);
+                alert('Resource updated successfully!');
+            } else {
+                // CREATE new resource
+                console.log("Creating new resource:", formData);
+                await ResourceService.createResource(formData);
+                alert('Resource added successfully!');
+            }
             
+            // Reset form
             setFormData({
                 name: '',
-                type: 'lecture_hall',
+                type: 'Lecture Hall',
                 capacity: 0,
                 location: '',
                 availabilityWindows: '',
@@ -47,16 +74,22 @@ const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
                 onResourceAdded();
             }
         } catch (error) {
-            console.error("Error creating resource: ", error);
-            alert('Failed to add resource. Please try again.');
+            console.error("Error saving resource: ", error);
+            alert(isEditing ? 'Failed to update resource.' : 'Failed to add resource.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    const handleCancel = () => {
+        if (onResourceAdded) {
+            onResourceAdded(); // This closes the form
+        }
+    };
+
     return (
         <div className="add-resource-form-container">
-            <h3>➕ Add New Resource</h3>
+            <h3>{isEditing ? '✏️ Edit Resource' : '➕ Add New Resource'}</h3>
             <form onSubmit={handleSubmit} className="add-resource-form">
                 <div className="form-row">
                     <div className="form-group">
@@ -134,17 +167,24 @@ const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
 
                 {facultyName && (
                     <div className="faculty-context-note">
-                        📍 Adding resource for: <strong>{facultyName}</strong>
+                        📍 {isEditing ? 'Editing resource for:' : 'Adding resource for:'} <strong>{facultyName}</strong>
                     </div>
                 )}
                 
                 <div className="form-actions">
                     <button 
+                        type="button" 
+                        className="btn-cancel"
+                        onClick={handleCancel}
+                    >
+                        Cancel
+                    </button>
+                    <button 
                         type="submit" 
                         className="btn-submit"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Adding...' : 'Add Resource'}
+                        {isSubmitting ? 'Saving...' : (isEditing ? 'Update Resource' : 'Add Resource')}
                     </button>
                 </div>
             </form>

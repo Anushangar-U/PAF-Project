@@ -10,6 +10,7 @@ import {
   FaClipboardList
 } from 'react-icons/fa';
 import { RiOrganizationChart } from 'react-icons/ri';
+import { MdArrowForward } from 'react-icons/md';  // ← ADD THIS IMPORT
 import ResourceService from '../services/ResourceService';
 import './ResourceHub.css';
 
@@ -92,10 +93,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
   };
 
-  const handleRequestResource = (resource) => {
-    alert(`Request sent for: ${resource.name}\nType: ${resource.type}\nLocation: ${resource.location}\n\nYour request has been submitted to the faculty administrator.`);
-  };
-
   const resourceCategories = useMemo(() => {
     const grouped = new Map();
 
@@ -121,7 +118,6 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         capacity: resource.capacity || 0,
         availabilityWindows: resource.availabilityWindows || 'Not specified',
         status: resource.status || 'UNKNOWN',
-        type: resource.type || 'Other',
         type: resource.type || 'Other',
       });
     });
@@ -266,12 +262,23 @@ const ResourceHub = ({ facultyId, facultyName }) => {
                         <span className="capacity-value">{item.capacity}</span>
                         <span className="capacity-label">Capacity</span>
                       </div>
-                      <button 
-                        className="btn-allocate-small"
-                        disabled={item.status !== 'ACTIVE'}
-                      >
-                        <MdArrowForward /> Allocate
-                      </button>
+                      {/* Show Request button only for Equipment type */}
+                      {item.type === 'Equipment' && item.status === 'ACTIVE' && (
+                        <button 
+                          className="btn-request-resource"
+                          onClick={() => handleRequestResource(item)}
+                        >
+                          <FaClipboardList /> Request
+                        </button>
+                      )}
+                      {item.type === 'Equipment' && item.status !== 'ACTIVE' && (
+                        <button 
+                          className="btn-request-resource disabled"
+                          disabled
+                        >
+                          <FaClipboardList /> Unavailable
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

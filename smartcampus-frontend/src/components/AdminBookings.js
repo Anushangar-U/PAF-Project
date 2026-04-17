@@ -1,20 +1,30 @@
+
 import React, { useEffect, useState } from 'react';
 import ResourceService from '../services/ResourceService';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:9091/api/bookings';
 
+const STATUS_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
+
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectId, setRejectId] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [dateFilter, setDateFilter] = useState('');
 
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [bookings, statusFilter, dateFilter]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -43,6 +53,21 @@ const AdminBookings = () => {
     setLoading(false);
   };
 
+  const applyFilters = () => {
+    let data = [...bookings];
+    if (statusFilter !== 'ALL') {
+      data = data.filter(b => b.status === statusFilter);
+    }
+    if (dateFilter) {
+      data = data.filter(b => {
+        // Accept if booking date matches filter date
+        if (!b.date) return false;
+        return b.date === dateFilter;
+      });
+    }
+    setFiltered(data);
+  };
+
   const renderStatusBadge = (status) => {
     let color = '#aaa';
     let bg = '#eee';
@@ -67,7 +92,9 @@ const AdminBookings = () => {
         color,
         background: bg,
         fontSize: '0.95em',
-        letterSpacing: 1
+        letterSpacing: 1,
+        minWidth: 80,
+        textAlign: 'center',
       }}>{status}</span>
     );
   };
@@ -132,51 +159,106 @@ const AdminBookings = () => {
     }
   };
 
+  // Dashboard summary
+  const total = bookings.length;
+  const pending = bookings.filter(b => b.status === 'PENDING').length;
+  const approved = bookings.filter(b => b.status === 'APPROVED').length;
+  const rejected = bookings.filter(b => b.status === 'REJECTED').length;
+
   return (
-    <div style={{maxWidth: 900, margin: '2rem auto'}}>
-      <h2>All Bookings (Admin)</h2>
-      {loading ? <div>Loading...</div> : error ? <div style={{color: 'red'}}>{error}</div> : (
-        <table style={{width: '100%', borderCollapse: 'collapse'}}>
-          <thead>
-            <tr>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>Resource</th>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>Purpose</th>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>Time</th>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>Status</th>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>User ID</th>
-              <th style={{border: '1px solid #ccc', padding: '8px'}}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.length === 0 && (
-              <tr><td colSpan="6" style={{textAlign: 'center'}}>No bookings found.</td></tr>
-            )}
-            {bookings.map(b => (
-              <tr key={b.id}>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.resourceName}</td>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.purpose || 'N/A'}</td>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>{formatBookingTime(b.date, b.startTime, b.endTime)}</td>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>{renderStatusBadge(b.status)}</td>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.userId || 'N/A'}</td>
-                <td style={{border: '1px solid #ccc', padding: '8px'}}>
-                  {b.status === 'PENDING' && (
-                    <>
-                      <button onClick={() => handleApprove(b.id)} style={{
-                        background: '#217a36', color: '#fff', border: 'none', borderRadius: 6,
-                        padding: '4px 14px', fontWeight: 600, marginRight: 8, cursor: 'pointer'
-                      }}>Approve</button>
-                      <button onClick={() => openRejectModal(b.id)} style={{
-                        background: '#a71d2a', color: '#fff', border: 'none', borderRadius: 6,
-                        padding: '4px 14px', fontWeight: 600, cursor: 'pointer'
-                      }}>Reject</button>
-                    </>
-                  )}
-                </td>
+    <div style={{maxWidth: 1100, margin: '2rem auto', fontFamily: 'inherit'}}>
+      {/* Dashboard Cards */}
+      <div style={{display: 'flex', gap: 24, marginBottom: 32}}>
+        <div style={{flex: 1, background: '#f7f7fa', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{fontSize: 28, color: '#6c63ff', marginBottom: 6}}><span role="img" aria-label="calendar">📅</span></div>
+          <div style={{fontWeight: 700, fontSize: 22}}>{total}</div>
+          <div style={{fontSize: 15, color: '#888'}}>Total Bookings</div>
+        </div>
+        <div style={{flex: 1, background: '#fff7e6', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{fontSize: 28, color: '#b26a00', marginBottom: 6}}><span role="img" aria-label="pending">⏳</span></div>
+          <div style={{fontWeight: 700, fontSize: 22}}>{pending}</div>
+          <div style={{fontSize: 15, color: '#b26a00'}}>Pending</div>
+        </div>
+        <div style={{flex: 1, background: '#e6fff2', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{fontSize: 28, color: '#217a36', marginBottom: 6}}><span role="img" aria-label="approved">✅</span></div>
+          <div style={{fontWeight: 700, fontSize: 22}}>{approved}</div>
+          <div style={{fontSize: 15, color: '#217a36'}}>Approved</div>
+        </div>
+        <div style={{flex: 1, background: '#fff0f0', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{fontSize: 28, color: '#a71d2a', marginBottom: 6}}><span role="img" aria-label="rejected">❌</span></div>
+          <div style={{fontWeight: 700, fontSize: 22}}>{rejected}</div>
+          <div style={{fontSize: 15, color: '#a71d2a'}}>Rejected</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{display: 'flex', alignItems: 'center', gap: 16, background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1rem 1.5rem', marginBottom: 24}}>
+        <div>
+          <label style={{fontWeight: 500, marginRight: 8}}>Status</label>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{padding: '6px 16px', borderRadius: 6, border: '1px solid #ccc', fontSize: 15}}>
+            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+        <div>
+          <label style={{fontWeight: 500, marginRight: 8}}>Date</label>
+          <input type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} style={{padding: '6px 16px', borderRadius: 6, border: '1px solid #ccc', fontSize: 15}} />
+        </div>
+        <button onClick={applyFilters} style={{background: '#ff9100', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 22px', fontWeight: 600, fontSize: 15, marginLeft: 8, boxShadow: '0 2px 8px rgba(255,145,0,0.08)', cursor: 'pointer'}}>
+          <span role="img" aria-label="filter">&#128269;</span> Apply Filter
+        </button>
+      </div>
+
+      {/* Table */}
+      <div style={{background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.5rem'}}>
+        <h3 style={{marginBottom: 18, fontWeight: 700, fontSize: 20, color: '#222'}}>All Bookings</h3>
+        {loading ? <div>Loading...</div> : error ? <div style={{color: 'red'}}>{error}</div> : (
+          <table style={{width: '100%', borderCollapse: 'collapse', fontSize: 15}}>
+            <thead>
+              <tr style={{background: '#f7f7fa'}}>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>ID</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>Resource</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>User ID</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>Start Time</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>End Time</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>Purpose</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>Status</th>
+                <th style={{border: '1px solid #eee', padding: '10px 8px'}}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr><td colSpan="8" style={{textAlign: 'center', padding: 24}}>No bookings found.</td></tr>
+              )}
+              {filtered.map(b => (
+                <tr key={b.id}>
+                  <td style={{border: '1px solid #eee', padding: '8px', color: '#6c63ff', fontWeight: 600}}>{b.id ? `#${b.id}` : ''}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{b.resourceName}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{b.userId || 'N/A'}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{formatBookingTime(b.date, b.startTime, b.startTime)}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{formatBookingTime(b.date, b.endTime, b.endTime)}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{b.purpose || 'N/A'}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>{renderStatusBadge(b.status)}</td>
+                  <td style={{border: '1px solid #eee', padding: '8px'}}>
+                    {b.status === 'PENDING' && (
+                      <>
+                        <button onClick={() => handleApprove(b.id)} style={{
+                          background: '#217a36', color: '#fff', border: 'none', borderRadius: 6,
+                          padding: '4px 14px', fontWeight: 600, marginRight: 8, cursor: 'pointer', fontSize: 15
+                        }}>Approve</button>
+                        <button onClick={() => openRejectModal(b.id)} style={{
+                          background: '#a71d2a', color: '#fff', border: 'none', borderRadius: 6,
+                          padding: '4px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 15
+                        }}>Reject</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
       {/* Reject Modal */}
       {showRejectModal && (
         <div style={{

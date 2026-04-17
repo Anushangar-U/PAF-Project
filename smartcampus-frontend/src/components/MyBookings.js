@@ -41,6 +41,36 @@ const MyBookings = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div style={{color: 'red'}}>{error}</div>;
 
+  // Helper to render colored status badge
+  const renderStatusBadge = (status) => {
+    let color = '#aaa';
+    let bg = '#eee';
+    switch (status) {
+      case 'PENDING':
+        color = '#b26a00'; bg = '#fff3cd'; break;
+      case 'APPROVED':
+        color = '#217a36'; bg = '#d4edda'; break;
+      case 'REJECTED':
+        color = '#a71d2a'; bg = '#f8d7da'; break;
+      case 'CANCELLED':
+        color = '#555'; bg = '#f1f1f1'; break;
+      default:
+        break;
+    }
+    return (
+      <span style={{
+        display: 'inline-block',
+        padding: '2px 12px',
+        borderRadius: '12px',
+        fontWeight: 600,
+        color,
+        background: bg,
+        fontSize: '0.95em',
+        letterSpacing: 1
+      }}>{status}</span>
+    );
+  };
+
   return (
     <div style={{maxWidth: 600, margin: '2rem auto'}}>
       <h2>My Bookings</h2>
@@ -62,7 +92,7 @@ const MyBookings = () => {
               <td style={{border: '1px solid #ccc', padding: '8px'}}>
                 {b.date} {b.startTime} - {b.endTime}
               </td>
-              <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.status}</td>
+              <td style={{border: '1px solid #ccc', padding: '8px'}}>{renderStatusBadge(b.status)}</td>
             </tr>
           ))}
         </tbody>

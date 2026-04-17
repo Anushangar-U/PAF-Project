@@ -1,5 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { getBookingsByUserId } from '../services/BookingService';
+import ResourceService from '../services/ResourceService';
 
 // Temporary placeholder until authentication is implemented.
 const TEMP_USER_ID = 1;
@@ -11,8 +13,23 @@ const MyBookings = () => {
 
   useEffect(() => {
     getBookingsByUserId(TEMP_USER_ID)
-      .then(res => {
-        setBookings(res.data);
+      .then(async res => {
+        const bookingsData = res.data;
+        // Fetch resource details for each booking
+        const bookingsWithResource = await Promise.all(
+          bookingsData.map(async (b) => {
+            if (b.resourceId) {
+              try {
+                const resourceRes = await ResourceService.getResourceById(b.resourceId);
+                return { ...b, resourceName: resourceRes.data.name };
+              } catch {
+                return { ...b, resourceName: 'N/A' };
+              }
+            }
+            return { ...b, resourceName: 'N/A' };
+          })
+        );
+        setBookings(bookingsWithResource);
         setLoading(false);
       })
       .catch(err => {
@@ -41,7 +58,7 @@ const MyBookings = () => {
           )}
           {bookings.map(b => (
             <tr key={b.id}>
-              <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.resource?.name || b.resourceName || 'N/A'}</td>
+              <td style={{border: '1px solid #ccc', padding: '8px'}}>{b.resourceName}</td>
               <td style={{border: '1px solid #ccc', padding: '8px'}}>
                 {b.date} {b.startTime} - {b.endTime}
               </td>

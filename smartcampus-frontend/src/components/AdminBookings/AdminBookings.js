@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import ResourceService from '../services/ResourceService';
+import ResourceService from '../../services/ResourceService';
 
 const API_URL = 'http://localhost:9091/api/bookings';
 const STATUS_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];

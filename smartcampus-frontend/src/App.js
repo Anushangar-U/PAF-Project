@@ -4,7 +4,8 @@ import Dashboard from './components/Dashboard';
 
 import ResourceList from './components/ResourceList';
 import BookingForm from './components/BookingForm';
-import MyBookings from './components/MyBookings';
+import MyBookings from './components/MyBookings/MyBookings';
+import AdminBookings from './components/AdminBookings/AdminBookings';
 
 function App() {
   return (

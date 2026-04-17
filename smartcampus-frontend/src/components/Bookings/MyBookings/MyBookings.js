@@ -108,13 +108,39 @@ const MyBookings = () => {
 
     return (
         <div className="mybookings-container">
-            <button className="action-button approve" style={{marginBottom: '1.5rem'}} onClick={() => setShowBookingModal(true)}>
-                Book Resource
-            </button>
-            {/* Page Header */}
-            <div className="mybookings-header">
-                <h1 className="mybookings-title">My Bookings</h1>
-                <div className="mybookings-subtitle">View and manage your resource bookings</div>
+            {/* Page Header with Book Resource Button on the right */}
+            <div className="mybookings-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 0 }}>
+                <div>
+                    <h1 className="mybookings-title" style={{ marginBottom: 2 }}>My Bookings</h1>
+                    <div className="mybookings-subtitle">View and manage your resource bookings</div>
+                </div>
+                <button
+                    onClick={() => setShowBookingModal(true)}
+                    style={{
+                        background: 'linear-gradient(90deg, #c62828 60%, #b71c1c 100%)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 15,
+                        padding: '10px 39px',
+                        fontWeight: 700,
+                        fontSize: 17,
+                        boxShadow: '0 2px 12px rgba(198,40,40,0.10)',
+                        cursor: 'pointer',
+                        transition: 'background 0.5s, box-shadow 0.5s',
+                        outline: 'none',
+                        marginLeft: 24,
+                        marginTop: 8,
+                        marginBottom: 8,
+                        letterSpacing: 0.2
+                    }}
+                    onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #8f0202 60%, #800808 100%)'}
+                    onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #b31515 60%, #faacac 100%)'}
+                >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" style={{ marginRight: 2 }}><rect x="3" y="5" width="18" height="14" rx="3" fill="#fff" fillOpacity="0.13"/><path d="M8 11h8M12 7v8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+                        Book Resource
+                    </span>
+                </button>
             </div>
 
             {/* Summary Cards */}

@@ -28,7 +28,7 @@
 
 .mybookings-summary {
     display: flex;
-    gap: 28px;
+    gap: 38px;
     margin-bottom: 36px;
     flex-wrap: wrap;
 }
@@ -38,7 +38,7 @@
     min-width: 180px;
     background: #fff;
     border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(99, 179, 237, 0.07);
+    box-shadow: 0 4px 12px rgba(99, 179, 237, 0.07);
     padding: 1.5rem 1.7rem;
     text-align: center;
     border: 1.5px solid #e3e8ee;
@@ -170,26 +170,27 @@
 }
 
 .action-button {
-    background: #eee;
-    color: #a71d2a;
-    border: 1px solid #a71d2a;
-    border-radius: 6px;
+    background: #f8abab;
+    color: #ec081b;
+    border: 1px solid #ffffff;
+    border-radius: 16px;
     padding: 4px 14px;
-    font-weight: 600;
+    font-weight: 550;
     cursor: pointer;
     transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     margin-right: 8px;
+    letter-spacing: 0.5px;
 }
 
 .action-button.cancel:hover {
-    background: #ffd6db;
-    color: #fff;
+    background: #830404;
+    color: #ffffff;
     box-shadow: 0 2px 8px rgba(167, 29, 42, 0.08);
 }
 
 .action-button.secondary {
     background: #f1f1f1;
-    color: #333;
+    color: #e4dfdf;
     border: 1px solid #bbb;
 }
 

@@ -59,66 +59,104 @@ const BookingFormModal = ({ onClose, onBooked }) => {
   };
 
   return (
-    <div className="mybookings-overlay">
-      <div className="mybookings-modal">
-        <h3 className="modal-title">Book a Resource</h3>
-        <form className="booking-form" onSubmit={handleSubmit}>
-          <select
-            name="resourceId"
-            value={form.resourceId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Resource</option>
-            {resources.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="time"
-            name="startTime"
-            value={form.startTime}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="time"
-            name="endTime"
-            value={form.endTime}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="purpose"
-            placeholder="Purpose"
-            value={form.purpose}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="number"
-            name="attendees"
-            placeholder="Attendees"
-            value={form.attendees}
-            onChange={handleChange}
-            required
-            min="1"
-          />
-          {error && <div className="mybookings-error">{error}</div>}
-          <div className="modal-actions">
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+      background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        width: '420px', maxWidth: '95vw', padding: '2.2rem 2.2rem 1.5rem 2.2rem', position: 'relative',
+        display: 'flex', flexDirection: 'column', alignItems: 'stretch'
+      }}>
+        <h2 style={{
+          fontSize: 22, fontWeight: 800, color: '#b71c1c', marginBottom: 8, textAlign: 'center', letterSpacing: 0.2
+        }}>Book a Resource</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ marginBottom: 2 }}>
+            <label style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, display: 'block' }}>Resource</label>
+            <select
+              name="resourceId"
+              value={form.resourceId}
+              onChange={handleChange}
+              required
+              style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15 }}
+            >
+              <option value="">Select Resource</option>
+              {resources.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ marginBottom: 2 }}>
+            <label style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, display: 'block' }}>Purpose</label>
+            <input
+              type="text"
+              name="purpose"
+              placeholder="Enter booking purpose"
+              value={form.purpose}
+              onChange={handleChange}
+              required
+              style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15 }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, display: 'block' }}>Start Date & Time</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                required
+                style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15, marginBottom: 6 }}
+              />
+              <input
+                type="time"
+                name="startTime"
+                value={form.startTime}
+                onChange={handleChange}
+                required
+                style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15 }}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, display: 'block' }}>End Date & Time</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                required
+                style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15, marginBottom: 6 }}
+              />
+              <input
+                type="time"
+                name="endTime"
+                value={form.endTime}
+                onChange={handleChange}
+                required
+                style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15 }}
+              />
+            </div>
+          </div>
+          <div style={{ marginBottom: 2 }}>
+            <label style={{ fontWeight: 600, fontSize: 15, marginBottom: 4, display: 'block' }}>Expected Attendees</label>
+            <input
+              type="number"
+              name="attendees"
+              placeholder="e.g. 10"
+              value={form.attendees}
+              onChange={handleChange}
+              required
+              min="1"
+              style={{ width: '100%', padding: 10, borderRadius: 7, border: '1px solid #ccc', fontSize: 15 }}
+            />
+          </div>
+          {error && <div style={{ color: '#b71c1c', background: '#fff3f3', borderRadius: 6, padding: '8px 12px', fontWeight: 600, marginBottom: 4, textAlign: 'center' }}>{error}</div>}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 10 }}>
             <button
               type="button"
-              className="action-button secondary"
+              style={{ background: '#eee', color: '#333', border: '1px solid #bbb', borderRadius: 6, padding: '8px 22px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
               onClick={onClose}
               disabled={submitting}
             >
@@ -126,7 +164,7 @@ const BookingFormModal = ({ onClose, onBooked }) => {
             </button>
             <button
               type="submit"
-              className="action-button approve"
+              style={{ background: '#c62828', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 22px', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(198,40,40,0.08)' }}
               disabled={submitting}
             >
               {submitting ? "Booking..." : "Book Now"}

@@ -108,11 +108,38 @@
     margin-right: 8px;
 }
 
-.admin-bookings-toolbar select,
+.admin-bookings-toolbar select {
+    padding: 8px 18px 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #c62828;
+    background: linear-gradient(90deg, #fff 80%, #fbe9e7 100%);
+    color: #b71c1c;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(198,40,40,0.06);
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    appearance: none;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.admin-bookings-toolbar select:focus {
+    border: 2px solid #b71c1c;
+    box-shadow: 0 0 0 2px #fbe9e7;
+}
+
+.admin-bookings-toolbar select option {
+    color: #222;
+    background: #fff;
+    font-weight: 600;
+}
+
 .admin-bookings-toolbar input[type='date'] {
-    padding: 6px 14px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #e3e8ee;
+    font-size: 15px;
 }
 
 .admin-bookings-table-wrapper {
@@ -164,8 +191,8 @@
     display: inline-block;
     padding: 4px 12px;
     border-radius: 14px;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.7rem;
     letter-spacing: 1px;
     min-width: 90px;
     text-align: center;
@@ -198,7 +225,7 @@
     padding: 6px 14px;
     font-weight: 700;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 14Px;
     margin-right: 8px;
     border: none;
     transition: background 0.2s, box-shadow 0.2s;

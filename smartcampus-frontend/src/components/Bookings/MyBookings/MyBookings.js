@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getBookingsByUserId } from '../../services/BookingService';
-import ResourceService from '../../services/ResourceService';
+import { getBookingsByUserId } from '../../../services/BookingService';
+import ResourceService from '../../../services/ResourceService';
 import './MyBookings.css';
 
 // Temporary placeholder until authentication is implemented.
@@ -59,7 +59,7 @@ const MyBookings = () => {
     const handleModalConfirm = async () => {
         if (!cancelId) return;
         try {
-            const { cancelBooking } = await import('../../services/BookingService');
+            const { cancelBooking } = await import('../../../services/BookingService');
             await cancelBooking(cancelId);
             setShowModal(false);
             setCancelId(null);

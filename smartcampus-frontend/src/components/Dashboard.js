@@ -7,8 +7,8 @@ import { MdOutlineComputer, MdArrowForward } from 'react-icons/md';
 import { BsGearFill, BsCpuFill } from 'react-icons/bs';
 import { RiOrganizationChart } from 'react-icons/ri';
 import ResourceHub from './ResourceHub';
-import MyBookings from './MyBookings/MyBookings';
-import AdminBookings from './AdminBookings/AdminBookings';
+import MyBookings from './Bookings/MyBookings/MyBookings';
+import AdminBookings from './Bookings/AdminBookings/AdminBookings';
 import './Dashboard.css';
 
 // Mock data structured similarly to the user's dashboard image

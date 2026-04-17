@@ -47,7 +47,7 @@ public class BookingService {
         return bookingRepository.findAll();
     }
 
-    public Booking approveBooking(Long id) {
+    public Booking approveBooking(String id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
@@ -81,7 +81,7 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public Booking rejectBooking(Long id, String reason) {
+    public Booking rejectBooking(String id, String reason) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
@@ -103,7 +103,7 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public Booking cancelBooking(Long id) {
+    public Booking cancelBooking(String id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 

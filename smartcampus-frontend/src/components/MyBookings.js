@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { getBookingsByUserId } from '../services/BookingService';
+
+// Temporary placeholder until authentication is implemented.
+const TEMP_USER_ID = 1;
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -7,7 +10,7 @@ const MyBookings = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios.get('/api/bookings/my')
+    getBookingsByUserId(TEMP_USER_ID)
       .then(res => {
         setBookings(res.data);
         setLoading(false);

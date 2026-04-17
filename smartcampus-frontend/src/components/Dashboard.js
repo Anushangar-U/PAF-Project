@@ -7,6 +7,7 @@ import { MdOutlineComputer, MdArrowForward } from 'react-icons/md';
 import { BsGearFill, BsCpuFill } from 'react-icons/bs';
 import { RiOrganizationChart } from 'react-icons/ri';
 import ResourceHub from './ResourceHub';
+import MyBookings from './MyBookings';
 import './Dashboard.css';
 
 // Mock data structured similarly to the user's dashboard image
@@ -113,6 +114,12 @@ const Dashboard = ({ renderContent }) => {
           >
             <RiOrganizationChart /> Resource Hub
           </div>
+          <div 
+            className={`menu-item ${activeTab === 'my-bookings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('my-bookings')}
+          >
+            <FaBookOpen /> My Bookings
+          </div>
           <div className="menu-item small" style={{ marginTop: 'auto', opacity: 0.5 }}>
             <BsGearFill /> smart allocation
           </div>
@@ -192,6 +199,10 @@ const Dashboard = ({ renderContent }) => {
 
             {activeTab === 'resource-hub' && (
               <ResourceHub />
+            )}
+
+            {activeTab === 'my-bookings' && (
+              <MyBookings />
             )}
           </>
         ) : (

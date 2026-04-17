@@ -13,6 +13,7 @@ const MyBookings = () => {
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
+    const [editBooking, setEditBooking] = useState(null); // holds booking to edit
     const [cancelId, setCancelId] = useState(null);
 
     const refreshBookings = () => {
@@ -195,14 +196,23 @@ const MyBookings = () => {
                                 <td>{formatDateTime(b.endTime)}</td>
                                 <td>{renderStatusBadge(b.status)}</td>
                                 <td>
-                                    {(b.status === 'PENDING' || b.status === 'APPROVED') && (
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        {(b.status === 'PENDING' || b.status === 'APPROVED') && (
+                                            <button
+                                                className="action-button cancel"
+                                                onClick={() => openCancelModal(b.id)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                         <button
-                                            className="action-button cancel"
-                                            onClick={() => openCancelModal(b.id)}
+                                            className="action-button approve"
+                                            style={{ background: '#fffbe6', color: '#b26a00', border: '1.5px solid #ffe6b3', fontWeight: 600, padding: '6px 16px', borderRadius: 6, cursor: 'pointer' }}
+                                            onClick={() => { setEditBooking(b); setShowBookingModal(true); }}
                                         >
-                                            Cancel
+                                            Edit
                                         </button>
-                                    )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -213,8 +223,9 @@ const MyBookings = () => {
             {/* Booking Modal */}
             {showBookingModal && (
                 <BookingFormModal
-                    onClose={() => setShowBookingModal(false)}
+                    onClose={() => { setShowBookingModal(false); setEditBooking(null); }}
                     onBooked={refreshBookings}
+                    booking={editBooking}
                 />
             )}
 

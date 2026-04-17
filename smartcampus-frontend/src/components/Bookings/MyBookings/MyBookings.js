@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import BookingFormModal from '../BookingFormModal';
 import { getBookingsByUserId } from '../../../services/BookingService';
 import ResourceService from '../../../services/ResourceService';
 import './MyBookings.css';
@@ -11,9 +12,12 @@ const MyBookings = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
     const [cancelId, setCancelId] = useState(null);
 
-    useEffect(() => {
+    const refreshBookings = () => {
+        setLoading(true);
+        setError('');
         getBookingsByUserId(TEMP_USER_ID)
             .then(async res => {
                 const bookingsData = res.data;
@@ -37,6 +41,10 @@ const MyBookings = () => {
                 setError('Failed to fetch bookings');
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        refreshBookings();
     }, []);
 
     if (loading) return <div className="mybookings-loading">Loading...</div>;
@@ -100,6 +108,9 @@ const MyBookings = () => {
 
     return (
         <div className="mybookings-container">
+            <button className="action-button approve" style={{marginBottom: '1.5rem'}} onClick={() => setShowBookingModal(true)}>
+                Book Resource
+            </button>
             {/* Page Header */}
             <div className="mybookings-header">
                 <h1 className="mybookings-title">My Bookings</h1>
@@ -172,6 +183,14 @@ const MyBookings = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Booking Modal */}
+            {showBookingModal && (
+                <BookingFormModal
+                    onClose={() => setShowBookingModal(false)}
+                    onBooked={refreshBookings}
+                />
+            )}
 
             {/* Cancel Booking Modal */}
             {showModal && (

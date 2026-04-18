@@ -780,22 +780,6 @@ const Dashboard = ({ renderContent }) => {
 
   return (
     <div className="dashboard-container">
-      <nav className="top-navbar">
-        <div className="nav-brand">
-          <FaUniversity className="nav-logo" />
-          <h2>CampusSmart</h2>
-        </div>
-        <div className="nav-menu">
-          <div 
-            className={`nav-item ${activeTab === 'faculties' ? 'active' : ''}`}
-            onClick={() => setActiveTab('faculties')}
-          >
-            <FaChalkboardTeacher />
-            <span>Faculties</span>
-          </div>
-        </div>
-      </nav>
-
       <main className="main-content">
         {!renderContent ? (
           <>
@@ -808,9 +792,6 @@ const Dashboard = ({ renderContent }) => {
                       <h1>Academic Faculties</h1>
                     </div>
                     <p className="page-subtitle">Explore departments, resources, and allocate smartly</p>
-                  </div>
-                  <div className="summary-badge">
-                    <span><RiOrganizationChart /> 6 Faculties</span>
                   </div>
                 </header>
 

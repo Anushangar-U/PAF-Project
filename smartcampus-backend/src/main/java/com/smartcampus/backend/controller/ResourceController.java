@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/resources")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ResourceController {
 
     private final ResourceService resourceService;

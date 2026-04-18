@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin
 public class BookingController {
 
     private final BookingService bookingService;
@@ -47,5 +47,12 @@ public class BookingController {
     @PatchMapping("/{id}/cancel")
     public Booking cancelBooking(@PathVariable String id) {
         return bookingService.cancelBooking(id);
+    }
+
+    @GetMapping("/resource/{resourceId}/slots")
+    public List<Map<String, String>> getBookedSlots(
+            @PathVariable String resourceId,
+            @RequestParam String date) {
+        return bookingService.getBookedSlots(resourceId, date);
     }
 }

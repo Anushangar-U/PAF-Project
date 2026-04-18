@@ -1,11 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import MyBookings from './components/Bookings/MyBookings/MyBookings';
 import AdminBookings from './components/Bookings/AdminBookings/AdminBookings';
 import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
+import Sidebar from './components/Sidebar';
 import './App.css';
 
 const AppLayout = ({ children }) => {
@@ -18,32 +19,7 @@ const AppLayout = ({ children }) => {
 
   return (
     <div className="app-layout">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <span className="sidebar-logo">🏛️</span>
-          <span className="sidebar-title">CampusSmart</span>
-          <span className="sidebar-subtitle">faculties • resources</span>
-        </div>
-        <nav>
-          <ul>
-            <li>
-              <NavLink to="/faculties">
-                <span role="img" aria-label="faculties">🔎</span> Faculties
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/mybookings">
-                <span role="img" aria-label="my bookings">📖</span> My Bookings
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/adminbookings">
-                <span role="img" aria-label="admin bookings">👤</span> Admin Bookings
-              </NavLink>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      <Sidebar />
       <main className="main-content">
         {children}
       </main>

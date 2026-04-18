@@ -10,8 +10,6 @@ import { MdOutlineComputer } from 'react-icons/md';
 import { BsCpuFill } from 'react-icons/bs';
 import { RiOrganizationChart } from 'react-icons/ri';
 import ResourceHub from './ResourceHub';
-import MyBookings from './Bookings/MyBookings/MyBookings';
-import AdminBookings from './Bookings/AdminBookings/AdminBookings';
 import './Dashboard.css';
 
 // Import images of faculties
@@ -796,29 +794,6 @@ const Dashboard = ({ renderContent }) => {
             <span>Faculties</span>
           </div>
         </div>
-        <div className="nav-menu">
-          <div 
-            className={`nav-item ${activeTab === 'faculties' ? 'active' : ''}`}
-            onClick={() => setActiveTab('faculties')}
-          >
-            <FaChalkboardTeacher />
-            <span>Faculties</span>
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'my-bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('my-bookings')}
-          >
-            <FaBookOpen />
-            <span>My Bookings</span>
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'admin-bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('admin-bookings')}
-          >
-            <FaUsers />
-            <span>Admin Bookings</span>
-          </div>
-        </div>
       </nav>
 
       <main className="main-content">
@@ -882,13 +857,6 @@ const Dashboard = ({ renderContent }) => {
                   <div className="no-results">No faculties match your search.</div>
                 )}
               </>
-            )}
-
-            {activeTab === 'my-bookings' && (
-              <MyBookings />
-            )}
-            {activeTab === 'admin-bookings' && (
-              <AdminBookings />
             )}
           </>
         ) : (

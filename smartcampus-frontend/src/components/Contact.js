@@ -15,26 +15,26 @@ const Contact = () => {
   const inputStyle = { color: NAV };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="flex-1">
         {/* Hero */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="py-24" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
             <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
-              style={{ background: '#0b162814', color: NAV }}>
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}>
               Get In Touch
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tight" style={{ color: NAV }}>Contact Us</h1>
-            <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto">
+            <h1 className="text-5xl font-extrabold tracking-tight text-white">Contact Us</h1>
+            <p className="text-lg font-medium max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
               Have a question, suggestion, or issue? We'd love to hear from you. Our team typically responds within 24 hours.
             </p>
           </div>
         </div>
 
         {/* Contact Grid */}
-        <div className="bg-slate-50 py-24 border-b border-slate-100">
+        <div className="bg-slate-100 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-16">
             {/* Form */}
             <div>
@@ -124,7 +124,7 @@ const Contact = () => {
         </div>
 
         {/* FAQ */}
-        <div className="bg-white py-24">
+        <div className="bg-slate-50 py-24">
           <div className="max-w-4xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"

@@ -6,12 +6,12 @@ const NAV = '#0b1628';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="flex-1">
         {/* Hero */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="bg-slate-50 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
@@ -62,7 +62,7 @@ const Home = () => {
         </div>
 
         {/* Impact Stats */}
-        <div className="bg-slate-50 py-16 border-b border-slate-100">
+        <div className="bg-slate-100 py-16 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-200">
               {[
@@ -81,7 +81,7 @@ const Home = () => {
         </div>
 
         {/* How It Works */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="bg-slate-50 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"
@@ -117,7 +117,7 @@ const Home = () => {
         </div>
 
         {/* Features */}
-        <div className="bg-slate-50 py-24 border-b border-slate-100">
+        <div className="bg-slate-100 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"
@@ -151,7 +151,7 @@ const Home = () => {
         </div>
 
         {/* Who Is It For */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="bg-slate-50 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"

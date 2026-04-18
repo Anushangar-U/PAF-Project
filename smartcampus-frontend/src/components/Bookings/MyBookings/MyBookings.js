@@ -21,23 +21,21 @@ const MyBookings = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await getBookingsByUserId(TEMP_USER_ID);
-            const bookingsData = res.data;
-            
-            const bookingsWithResource = await Promise.all(
-                bookingsData.map(async (b) => {
-                    if (b.resourceId) {
-                        try {
-                            const resourceRes = await ResourceService.getResourceById(b.resourceId);
-                            return { ...b, resourceName: resourceRes.data.name };
-                        } catch {
-                            return { ...b, resourceName: 'Unknown Resource' };
-                        }
-                    }
-                    return { ...b, resourceName: 'Unknown Resource' };
-                })
+            const [bookingsRes, resourcesRes] = await Promise.all([
+                getBookingsByUserId(TEMP_USER_ID),
+                ResourceService.getAllResources(),
+            ]);
+
+            const resourceMap = Object.fromEntries(
+                (resourcesRes.data || []).map((r) => [r.id, r.name])
             );
-            setBookings(bookingsWithResource);
+
+            setBookings(
+                bookingsRes.data.map((b) => ({
+                    ...b,
+                    resourceName: resourceMap[b.resourceId] || 'Unknown Resource',
+                }))
+            );
         } catch {
             setError('Failed to fetch bookings');
         } finally {

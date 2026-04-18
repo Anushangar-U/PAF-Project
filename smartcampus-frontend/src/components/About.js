@@ -6,28 +6,28 @@ const NAV = '#0b1628';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="flex-1">
         {/* Hero */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="py-24" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
             <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
-              style={{ background: '#0b162814', color: NAV }}>
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}>
               About Us
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tight leading-tight" style={{ color: NAV }}>
+            <h1 className="text-5xl font-extrabold tracking-tight leading-tight text-white">
               Built for Campus. <br/>Built for You.
             </h1>
-            <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg font-medium max-w-2xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
               CampusSmart was created to eliminate the friction of campus resource management, replacing slow manual processes with a fast, transparent digital platform.
             </p>
           </div>
         </div>
 
         {/* Mission */}
-        <div className="bg-slate-50 py-24 border-b border-slate-100">
+        <div className="bg-slate-100 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
@@ -62,7 +62,7 @@ const About = () => {
         </div>
 
         {/* Team */}
-        <div className="bg-white py-24 border-b border-slate-100">
+        <div className="bg-slate-50 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"
@@ -91,7 +91,7 @@ const About = () => {
         </div>
 
         {/* Values */}
-        <div className="bg-slate-50 py-24 border-b border-slate-100">
+        <div className="bg-slate-100 py-24 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4"

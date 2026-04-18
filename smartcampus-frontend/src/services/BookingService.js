@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:9090/api/bookings';
+const API_URL = 'http://localhost:9091/api/bookings';
 
 // Create booking
 export const createBooking = async (bookingData) => {

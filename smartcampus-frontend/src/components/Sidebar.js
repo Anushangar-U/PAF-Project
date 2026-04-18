@@ -11,9 +11,9 @@ import {
 import { cn } from '../lib/utils';
 
 const mainNav = [
-  { to: '/faculties', icon: LayoutDashboard, label: 'Faculties' },
-  { to: '/mybookings', icon: BookOpen, label: 'My Bookings', badge: '3' },
-  { to: '/adminbookings', icon: ShieldCheck, label: 'Admin Bookings' },
+  { to: "/faculties", icon: LayoutDashboard, label: "Faculties" },
+  { to: "/mybookings", icon: BookOpen, label: "My Bookings", badge: "" },
+  { to: "/adminbookings", icon: ShieldCheck, label: "Admin Bookings" },
 ];
 
 const NavItem = ({ to, icon: Icon, label, badge, onClick }) => (

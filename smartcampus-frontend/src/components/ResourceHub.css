@@ -73,6 +73,46 @@
   color: #718096;
 }
 
+/* ============================================ */
+/* ADMIN TOOLBAR - NEW */
+/* ============================================ */
+.admin-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.btn-admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.btn-admin-toggle:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
+}
+
+.btn-admin-toggle.active {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.btn-admin-toggle.active:hover {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+}
+
 /* Filter Bar */
 .filter-bar {
   display: flex;
@@ -311,32 +351,93 @@
   display: block;
 }
 
-.btn-allocate-small {
+/* ============================================ */
+/* ADMIN ACTIONS (EDIT/DELETE BUTTONS) - NEW */
+/* ============================================ */
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-edit {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  background: #2b6cb0;
+  padding: 8px 14px;
+  background: #ecc94b;
+  color: #744210;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-edit:hover {
+  background: #d69e2e;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #fc8181;
+  color: #742a2a;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #f56565;
+  transform: translateY(-1px);
+}
+
+/* Request Resource Button - Now for ALL resources */
+.btn-request-resource {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #805ad5, #6b46c0);
   color: white;
   border: none;
   border-radius: 20px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.btn-allocate-small:hover:not(:disabled) {
-  background: #1a4a7a;
+.btn-request-resource:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(128, 90, 213, 0.3);
+  background: linear-gradient(135deg, #6b46c0, #553c9a);
 }
 
-.btn-allocate-small:disabled {
+.btn-request-resource.disabled {
   background: #cbd5e0;
   cursor: not-allowed;
+  transform: none;
+  color: #718096;
 }
 
-/* Allocation Log */
+.btn-request-resource.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Request Log Section */
 .resource-log-preview {
   margin-top: 32px;
   padding: 20px;
@@ -392,5 +493,40 @@
   
   .type-filter {
     flex: 1;
+  }
+  
+  .resource-item-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .item-action {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .item-capacity {
+    text-align: left;
+  }
+  
+  .btn-request-resource {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .admin-actions {
+    flex-wrap: wrap;
+  }
+
+  .btn-edit, .btn-delete {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .btn-admin-toggle {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 }

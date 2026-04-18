@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import ResourceService from '../services/ResourceService';
+import './AddResourceForm.css';
 
-const AddResourceForm = ({ onResourceAdded }) => {
-    // State to hold the form data
+const AddResourceForm = ({ onResourceAdded, facultyId, facultyName }) => {
     const [formData, setFormData] = useState({
         name: '',
-        type: 'lecture_hall', // Default value
+        type: 'lecture_hall',
         capacity: 0,
         location: '',
         availabilityWindows: '',
-        status: 'ACTIVE' // Default value
+        status: 'ACTIVE',
+        facultyId: facultyId || '',
+        facultyName: facultyName || ''
     });
 
-    // Handle input changes
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -21,102 +24,129 @@ const AddResourceForm = ({ onResourceAdded }) => {
         });
     };
 
-    // Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent page reload
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
         
-        // Call the POST service we wrote earlier
-        ResourceService.createResource(formData)
-            .then((response) => {
-                alert('Resource added successfully!');
-                
-                // Clear the form
-                setFormData({
-                    name: '',
-                    type: 'lecture_hall',
-                    capacity: 0,
-                    location: '',
-                    availabilityWindows: '',
-                    status: 'ACTIVE'
-                });
-                
-                // Tell the parent component (ResourceList) to refresh the table
-                if (onResourceAdded) {
-                    onResourceAdded();
-                }
-            })
-            .catch((error) => {
-                console.error("Error creating resource: ", error);
-                alert('Failed to add resource. Please check the console.');
+        try {
+            await ResourceService.createResource(formData);
+            alert('Resource added successfully!');
+            
+            setFormData({
+                name: '',
+                type: 'lecture_hall',
+                capacity: 0,
+                location: '',
+                availabilityWindows: '',
+                status: 'ACTIVE',
+                facultyId: facultyId || '',
+                facultyName: facultyName || ''
             });
+            
+            if (onResourceAdded) {
+                onResourceAdded();
+            }
+        } catch (error) {
+            console.error("Error creating resource: ", error);
+            alert('Failed to add resource. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <div style={{ padding: '20px', border: '1px solid #ccc', marginBottom: '20px', backgroundColor: '#f9f9f9' }}>
-            <h3>Add New Resource</h3>
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Name: </label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        value={formData.name} 
-                        onChange={handleChange} 
-                        required 
-                        style={{ marginLeft: '10px' }}
-                    />
+        <div className="add-resource-form-container">
+            <h3>➕ Add New Resource</h3>
+            <form onSubmit={handleSubmit} className="add-resource-form">
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Resource Name *</label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            value={formData.name} 
+                            onChange={handleChange} 
+                            required 
+                            placeholder="e.g., Room 101, Projector X1"
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Type *</label>
+                        <select name="type" value={formData.type} onChange={handleChange}>
+                            <option value="Lecture Hall">Lecture Hall</option>
+                            <option value="Lab">Lab</option>
+                            <option value="Meeting Room">Meeting Room</option>
+                            <option value="Equipment">Equipment</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Type: </label>
-                    <select name="type" value={formData.type} onChange={handleChange} style={{ marginLeft: '10px' }}>
-                        <option value="lecture_hall">Lecture Hall</option>
-                        <option value="lab">Lab</option>
-                        <option value="meeting_room">Meeting Room</option>
-                        <option value="equipment">Equipment</option>
-                    </select>
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Capacity</label>
+                        <input 
+                            type="number" 
+                            name="capacity" 
+                            value={formData.capacity} 
+                            onChange={handleChange} 
+                            min="0"
+                            placeholder="0 for equipment"
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Status *</label>
+                        <select name="status" value={formData.status} onChange={handleChange}>
+                            <option value="ACTIVE">Active</option>
+                            <option value="OUT_OF_SERVICE">Out of Service</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Capacity: </label>
-                    <input 
-                        type="number" 
-                        name="capacity" 
-                        value={formData.capacity} 
-                        onChange={handleChange} 
-                        min="0"
-                        style={{ marginLeft: '10px' }}
-                    />
+                <div className="form-row">
+                    <div className="form-group full-width">
+                        <label>Location *</label>
+                        <input 
+                            type="text" 
+                            name="location" 
+                            value={formData.location} 
+                            onChange={handleChange} 
+                            required 
+                            placeholder="e.g., Block B, Room 101"
+                        />
+                    </div>
                 </div>
                 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Location: </label>
-                    <input 
-                        type="text" 
-                        name="location" 
-                        value={formData.location} 
-                        onChange={handleChange} 
-                        required 
-                        style={{ marginLeft: '10px' }}
-                    />
+                <div className="form-row">
+                    <div className="form-group full-width">
+                        <label>Availability Windows *</label>
+                        <input 
+                            type="text" 
+                            name="availabilityWindows" 
+                            value={formData.availabilityWindows} 
+                            onChange={handleChange} 
+                            placeholder="e.g., Mon-Fri 08:00-18:00"
+                            required 
+                        />
+                    </div>
                 </div>
+
+                {facultyName && (
+                    <div className="faculty-context-note">
+                        📍 Adding resource for: <strong>{facultyName}</strong>
+                    </div>
+                )}
                 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Availability Windows: </label>
-                    <input 
-                        type="text" 
-                        name="availabilityWindows" 
-                        value={formData.availabilityWindows} 
-                        onChange={handleChange} 
-                        placeholder="e.g., 08:00-18:00"
-                        required 
-                        style={{ marginLeft: '10px' }}
-                    />
+                <div className="form-actions">
+                    <button 
+                        type="submit" 
+                        className="btn-submit"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Adding...' : 'Add Resource'}
+                    </button>
                 </div>
-                
-                <button type="submit" style={{ padding: '5px 15px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
-                    Add Resource
-                </button>
             </form>
         </div>
     );

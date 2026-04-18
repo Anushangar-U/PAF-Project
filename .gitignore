@@ -1,0 +1,15 @@
+# IDE - VSCode
+.vscode/
+
+# IDE - IntelliJ
+.idea/
+
+# Spring Boot Backend
+smartcampus-backend/target/
+
+# React Frontend
+smartcampus-frontend/node_modules/
+
+# OS Files
+.DS_Store
+Thumbs.db

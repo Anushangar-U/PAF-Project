@@ -3,9 +3,8 @@ import './App.css';
 import Dashboard from './components/Dashboard';
 
 import ResourceList from './components/ResourceList';
-import BookingForm from './components/Bookings/BookingForm';
-import MyBookings from './components/Bookings/MyBookings/MyBookings';
-import AdminBookings from './components/Bookings/AdminBookings/AdminBookings';
+import BookingForm from './components/BookingForm';
+import MyBookings from './components/MyBookings';
 
 function App() {
   return (

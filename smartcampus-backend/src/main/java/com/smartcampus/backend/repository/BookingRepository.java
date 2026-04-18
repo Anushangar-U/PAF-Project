@@ -15,9 +15,16 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     
     @Query("{ 'resourceId': ?0, 'status': ?1, 'startTime': { $lt: ?2 }, 'endTime': { $gt: ?3 } }")
     List<Booking> findByResourceIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
-        String resourceId,  // ✅ String
+        String resourceId,
         String status,
         LocalDateTime endTime,
         LocalDateTime startTime
+    );
+
+    @Query("{ 'resourceId': ?0, 'status': 'APPROVED', 'startTime': { $gte: ?1, $lt: ?2 } }")
+    List<Booking> findApprovedBookingsForResourceOnDate(
+        String resourceId,
+        LocalDateTime dayStart,
+        LocalDateTime dayEnd
     );
 }

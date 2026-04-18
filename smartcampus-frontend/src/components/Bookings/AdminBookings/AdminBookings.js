@@ -22,7 +22,23 @@ const AdminBookings = () => {
     const [rejectId, setRejectId] = useState(null);
     const [rejectReason, setRejectReason] = useState('');
 
-    useEffect(() => { fetchBookings(); }, []);
+    const [resourceMap, setResourceMap] = useState({});
+
+    useEffect(() => {
+        // Fetch all resources once and build a map (both string and number keys)
+        ResourceService.getAllResources()
+            .then(res => {
+                const map = {};
+                res.data.forEach(r => {
+                    // Always use string for id keys
+                    map[String(r.id)] = r.name;
+                });
+                setResourceMap(map);
+            })
+            .catch(() => setResourceMap({}));
+        fetchBookings();
+    }, []);
+
     useEffect(() => { applyFilters(); }, [bookings, statusFilter, dateFilter]);
 
     const fetchBookings = async () => {
@@ -30,21 +46,7 @@ const AdminBookings = () => {
         setError('');
         try {
             const res = await axios.get(API_URL);
-            const bookingsData = res.data;
-            const bookingsWithResource = await Promise.all(
-                bookingsData.map(async (b) => {
-                    try {
-                        if (b.resourceId) {
-                            const resourceRes = await ResourceService.getResourceById(b.resourceId);
-                            return { ...b, resourceName: resourceRes?.data?.name || `Resource ${b.resourceId}` };
-                        }
-                        return { ...b, resourceName: 'N/A' };
-                    } catch {
-                        return { ...b, resourceName: `Resource ${b.resourceId || 'N/A'}` };
-                    }
-                })
-            );
-            setBookings(bookingsWithResource);
+            setBookings(res.data);
         } catch {
             setError('Failed to fetch bookings');
         } finally {
@@ -196,7 +198,9 @@ const AdminBookings = () => {
                             {filtered.map((b, idx) => (
                                 <tr key={b.id} className={idx % 2 === 1 ? 'striped' : ''}>
                                     <td title={b.id}>{b.id ? `...${b.id.slice(-6)}` : ''}</td>
-                                    <td>{b.resourceName}</td>
+                                    <td title={b.resourceId}>
+                                        {resourceMap[String(b.resourceId)] || b.resourceId || 'N/A'}
+                                    </td>
                                     <td>{b.userId}</td>
                                     <td>{formatBookingTime(b.startTime)}</td>
                                     <td>{formatBookingTime(b.endTime)}</td>

@@ -24,9 +24,10 @@ const MyBookings = () => {
                 const bookingsData = res.data;
                 const bookingsWithResource = await Promise.all(
                     bookingsData.map(async (b) => {
-                        if (b.resourceId) {
+                        if (b.resourceId !== undefined && b.resourceId !== null) {
                             try {
-                                const resourceRes = await ResourceService.getResourceById(b.resourceId);
+                                // Always convert resourceId to string for lookup
+                                const resourceRes = await ResourceService.getResourceById(b.resourceId.toString());
                                 return { ...b, resourceName: resourceRes.data.name };
                             } catch {
                                 return { ...b, resourceName: 'N/A' };
@@ -79,9 +80,10 @@ const MyBookings = () => {
                     const bookingsData = res.data;
                     const bookingsWithResource = await Promise.all(
                         bookingsData.map(async (b) => {
-                            if (b.resourceId) {
+                            if (b.resourceId !== undefined && b.resourceId !== null) {
                                 try {
-                                    const resourceRes = await ResourceService.getResourceById(b.resourceId);
+                                    // Always convert resourceId to string for lookup
+                                    const resourceRes = await ResourceService.getResourceById(b.resourceId.toString());
                                     return { ...b, resourceName: resourceRes.data.name };
                                 } catch {
                                     return { ...b, resourceName: 'N/A' };

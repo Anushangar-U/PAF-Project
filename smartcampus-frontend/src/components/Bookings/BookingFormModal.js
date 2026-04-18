@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const TEMP_USER_ID = 1;
-
 const BookingFormModal = ({ onClose, onBooked, booking }) => {
   const [resources, setResources] = useState([]);
   const [form, setForm] = useState({
@@ -60,18 +58,19 @@ const handleSubmit = async (e) => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="mybookings-overlay">
-      <div className="mybookings-modal">
-        <h3 className="modal-title">{booking ? 'Edit Booking' : 'Book a Resource'}</h3>
-        <form className="booking-form styled-booking-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="resourceId">Resource *</label>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-md shadow-lg border p-6 max-w-md w-full">
+        <h3 className="text-xl font-bold text-slate-900 mb-4">{booking ? 'Edit Booking' : 'Book a Resource'}</h3>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-1.5">
+            <label htmlFor="resourceId" className="text-sm font-medium leading-none text-slate-700">Resource *</label>
             <select
               id="resourceId"
               name="resourceId"
               value={form.resourceId}
               onChange={handleChange}
               required
+              className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">Select Resource</option>
               {resources
@@ -84,8 +83,8 @@ const handleSubmit = async (e) => {
             </select>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="date">Date *</label>
+          <div className="space-y-1.5">
+            <label htmlFor="date" className="text-sm font-medium leading-none text-slate-700">Date *</label>
             <input
               id="date"
               type="date"
@@ -94,12 +93,13 @@ const handleSubmit = async (e) => {
               onChange={handleChange}
               required
               min={today}
+              className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
           
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="startTime">Start Time *</label>
+          <div className="flex gap-4">
+            <div className="space-y-1.5 flex-1">
+              <label htmlFor="startTime" className="text-sm font-medium leading-none text-slate-700">Start Time *</label>
               <input
                 id="startTime"
                 type="time"
@@ -107,10 +107,11 @@ const handleSubmit = async (e) => {
                 value={form.startTime}
                 onChange={handleChange}
                 required
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="endTime">End Time *</label>
+            <div className="space-y-1.5 flex-1">
+              <label htmlFor="endTime" className="text-sm font-medium leading-none text-slate-700">End Time *</label>
               <input
                 id="endTime"
                 type="time"
@@ -118,12 +119,13 @@ const handleSubmit = async (e) => {
                 value={form.endTime}
                 onChange={handleChange}
                 required
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="purpose">Purpose *</label>
+          <div className="space-y-1.5">
+            <label htmlFor="purpose" className="text-sm font-medium leading-none text-slate-700">Purpose *</label>
             <input
               id="purpose"
               type="text"
@@ -132,11 +134,12 @@ const handleSubmit = async (e) => {
               value={form.purpose}
               onChange={handleChange}
               required
+              className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="attendees">Number of Attendees *</label>
+          <div className="space-y-1.5">
+            <label htmlFor="attendees" className="text-sm font-medium leading-none text-slate-700">Number of Attendees *</label>
             <input
               id="attendees"
               type="number"
@@ -147,15 +150,16 @@ const handleSubmit = async (e) => {
               required
               min="1"
               max="500"
+              className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
           
-          {error && <div className="mybookings-error">{error}</div>}
+          {error && <div className="text-sm font-medium text-destructive">{error}</div>}
           
-          <div className="modal-actions">
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              className="action-button secondary"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-slate-50 h-10 px-4 py-2 transition-colors disabled:opacity-50"
               onClick={onClose}
               disabled={submitting}
             >
@@ -163,7 +167,7 @@ const handleSubmit = async (e) => {
             </button>
             <button
               type="submit"
-              className="action-button approve"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 h-10 px-4 py-2 transition-colors disabled:opacity-50"
               disabled={submitting}
             >
               {submitting ? (booking ? "Saving..." : "Booking...") : (booking ? "Save Changes" : "Book Now")}

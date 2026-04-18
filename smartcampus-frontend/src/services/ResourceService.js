@@ -9,6 +9,11 @@ class ResourceService {
         return axios.get(API_BASE_URL);
     }
 
+    // 6. GET resource by ID
+    getResourceById(id) {
+        return axios.get(`${API_BASE_URL}/${id}`);
+    }
+
     // 2. GET resources filtered by type (e.g., 'lab')
     getResourcesByType(type) {
         return axios.get(`${API_BASE_URL}?type=${type}`);

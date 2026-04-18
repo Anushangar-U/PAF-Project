@@ -9,21 +9,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Resource {
 
     @Id
-    private Long id;
+    private String id;
 
     private String name;
-
     private String type; 
-
     private int capacity; 
-
     private String location; 
-
     private String availabilityWindows; 
-
     private String status; 
-
     private String facultyId;
-    
     private String facultyName;
 }

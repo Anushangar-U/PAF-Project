@@ -27,49 +27,37 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError("");
-    try {
-      const startTime = `${form.date}T${form.startTime}`;
-      const endTime = `${form.date}T${form.endTime}`;
-      if (booking && booking.id) {
-        // Edit mode: update booking
-        await axios.put(`http://localhost:9091/api/bookings/${booking.id}`, {
-          userId: TEMP_USER_ID,
-          resourceId: form.resourceId,
-          startTime,
-          endTime,
-          purpose: form.purpose,
-          attendees: form.attendees,
-        });
-      } else {
-        // Create mode: new booking
-        await axios.post("http://localhost:9091/api/bookings", {
-          userId: TEMP_USER_ID,
-          resourceId: form.resourceId,
-          startTime,
-          endTime,
-          purpose: form.purpose,
-          attendees: form.attendees,
-        });
-      }
-      onClose();
-      onBooked(); // Refresh MyBookings list
-    } catch (err) {
-      const errMsg = err.response?.data;
-      if (typeof errMsg === 'string' && errMsg.includes("conflict")) {
-        setError("Time slot already booked!");
-      } else if (typeof errMsg === 'string') {
-        setError(errMsg);
-      } else {
-        setError(booking ? "Error updating booking" : "Error creating booking");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+  setError("");
+  
+  try {
+    // HARDCODED TEST DATA
+    const testBooking = {
+      userId: 1,
+      resourceId: "69e36b3a6b86353359944344", // Computer Lab 101
+      startTime: "2026-04-20T10:00:00",
+      endTime: "2026-04-20T11:00:00",
+      purpose: "Test booking",
+      attendees: 5
+    };
+    
+    console.log("Sending test booking:", testBooking);
+    await axios.post("http://localhost:9091/api/bookings", testBooking);
+    
+    alert("Test booking created!");
+    onClose();
+    onBooked();
+  } catch (err) {
+    console.error("Error:", err.response?.data);
+    setError(err.response?.data || "Failed to create booking");
+  } finally {
+    setSubmitting(false);
+  }
+};
+  // Get today's date for min date attribute
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="mybookings-overlay">
@@ -77,7 +65,7 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
         <h3 className="modal-title">{booking ? 'Edit Booking' : 'Book a Resource'}</h3>
         <form className="booking-form styled-booking-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="resourceId">Resource</label>
+            <label htmlFor="resourceId">Resource *</label>
             <select
               id="resourceId"
               name="resourceId"
@@ -86,15 +74,18 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
               required
             >
               <option value="">Select Resource</option>
-              {resources.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
+              {resources
+                .filter(r => r.status === 'ACTIVE')
+                .map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name} ({r.type})
+                  </option>
+                ))}
             </select>
           </div>
+          
           <div className="form-group">
-            <label htmlFor="date">Date</label>
+            <label htmlFor="date">Date *</label>
             <input
               id="date"
               type="date"
@@ -102,11 +93,13 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
               value={form.date}
               onChange={handleChange}
               required
+              min={today}
             />
           </div>
+          
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="startTime">Start Time</label>
+              <label htmlFor="startTime">Start Time *</label>
               <input
                 id="startTime"
                 type="time"
@@ -117,7 +110,7 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="endTime">End Time</label>
+              <label htmlFor="endTime">End Time *</label>
               <input
                 id="endTime"
                 type="time"
@@ -128,32 +121,37 @@ const BookingFormModal = ({ onClose, onBooked, booking }) => {
               />
             </div>
           </div>
+          
           <div className="form-group">
-            <label htmlFor="purpose">Purpose</label>
+            <label htmlFor="purpose">Purpose *</label>
             <input
               id="purpose"
               type="text"
               name="purpose"
-              placeholder="Purpose"
+              placeholder="e.g., Lab session, Group study"
               value={form.purpose}
               onChange={handleChange}
               required
             />
           </div>
+          
           <div className="form-group">
-            <label htmlFor="attendees">Attendees</label>
+            <label htmlFor="attendees">Number of Attendees *</label>
             <input
               id="attendees"
               type="number"
               name="attendees"
-              placeholder="Attendees"
+              placeholder="Enter number of attendees"
               value={form.attendees}
               onChange={handleChange}
               required
               min="1"
+              max="500"
             />
           </div>
+          
           {error && <div className="mybookings-error">{error}</div>}
+          
           <div className="modal-actions">
             <button
               type="button"

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:9090/api/resources';
+const API_BASE_URL = 'http://localhost:9091/api/resources';
 
 class ResourceService {
         // Get resource by ID (needed for booking lookups)

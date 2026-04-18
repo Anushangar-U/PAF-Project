@@ -12,7 +12,7 @@ public class Booking {
     private String id;
 
     private Long userId;
-    private Long resourceId;
+    private String resourceId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String purpose;
@@ -32,8 +32,8 @@ public class Booking {
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
-    public Long getResourceId() { return resourceId; }
-    public void setResourceId(Long resourceId) { this.resourceId = resourceId; }
+    public String getResourceId() { return resourceId; }
+    public void setResourceId(String resourceId) { this.resourceId = resourceId; }
 
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }

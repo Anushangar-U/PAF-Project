@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import BookingFormModal from '../BookingFormModal';
-import { getBookingsByUserId } from '../../../services/BookingService';
+import { getBookingsByUserId, cancelBooking } from '../../../services/BookingService';
 import ResourceService from '../../../services/ResourceService';
 import './MyBookings.css';
 
@@ -13,41 +13,52 @@ const MyBookings = () => {
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
-    const [editBooking, setEditBooking] = useState(null); // holds booking to edit
+    const [editBooking, setEditBooking] = useState(null);
     const [cancelId, setCancelId] = useState(null);
 
-    const refreshBookings = () => {
+    const refreshBookings = async () => {
         setLoading(true);
         setError('');
-        getBookingsByUserId(TEMP_USER_ID)
-            .then(async res => {
-                const bookingsData = res.data;
-                const bookingsWithResource = await Promise.all(
-                    bookingsData.map(async (b) => {
-                        if (b.resourceId !== undefined && b.resourceId !== null) {
-                            try {
-                                // Always convert resourceId to string for lookup
-                                const resourceRes = await ResourceService.getResourceById(b.resourceId.toString());
-                                return { ...b, resourceName: resourceRes.data.name };
-                            } catch {
-                                return { ...b, resourceName: 'N/A' };
-                            }
+        try {
+            const res = await getBookingsByUserId(TEMP_USER_ID);
+            const bookingsData = res.data;
+            
+            const bookingsWithResource = await Promise.all(
+                bookingsData.map(async (b) => {
+                    if (b.resourceId) {
+                        try {
+                            const resourceRes = await ResourceService.getResourceById(b.resourceId);
+                            return { ...b, resourceName: resourceRes.data.name };
+                        } catch {
+                            return { ...b, resourceName: 'Unknown Resource' };
                         }
-                        return { ...b, resourceName: 'N/A' };
-                    })
-                );
-                setBookings(bookingsWithResource);
-                setLoading(false);
-            })
-            .catch(() => {
-                setError('Failed to fetch bookings');
-                setLoading(false);
-            });
+                    }
+                    return { ...b, resourceName: 'Unknown Resource' };
+                })
+            );
+            setBookings(bookingsWithResource);
+        } catch {
+            setError('Failed to fetch bookings');
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         refreshBookings();
     }, []);
+
+    const handleModalConfirm = async () => {
+        if (!cancelId) return;
+        try {
+            await cancelBooking(cancelId);
+            setShowModal(false);
+            setCancelId(null);
+            refreshBookings(); // ✅ Clean refresh
+        } catch {
+            alert('Failed to cancel booking.');
+        }
+    };
 
     if (loading) return <div className="mybookings-loading">Loading...</div>;
     if (error) return <div className="mybookings-error">{error}</div>;
@@ -66,54 +77,18 @@ const MyBookings = () => {
         setCancelId(null);
     };
 
-    const handleModalConfirm = async () => {
-        if (!cancelId) return;
-        try {
-            const { cancelBooking } = await import('../../../services/BookingService');
-            await cancelBooking(cancelId);
-            setShowModal(false);
-            setCancelId(null);
-            setLoading(true);
-            setError('');
-            getBookingsByUserId(TEMP_USER_ID)
-                .then(async res => {
-                    const bookingsData = res.data;
-                    const bookingsWithResource = await Promise.all(
-                        bookingsData.map(async (b) => {
-                            if (b.resourceId !== undefined && b.resourceId !== null) {
-                                try {
-                                    // Always convert resourceId to string for lookup
-                                    const resourceRes = await ResourceService.getResourceById(b.resourceId.toString());
-                                    return { ...b, resourceName: resourceRes.data.name };
-                                } catch {
-                                    return { ...b, resourceName: 'N/A' };
-                                }
-                            }
-                            return { ...b, resourceName: 'N/A' };
-                        })
-                    );
-                    setBookings(bookingsWithResource);
-                    setLoading(false);
-                })
-                .catch(() => {
-                    setError('Failed to fetch bookings');
-                    setLoading(false);
-                });
-        } catch {
-            alert('Failed to cancel booking.');
-        }
-    };
-
     const total = bookings.length;
     const pending = bookings.filter((b) => b.status === 'PENDING').length;
     const approved = bookings.filter((b) => b.status === 'APPROVED').length;
     const rejected = bookings.filter((b) => b.status === 'REJECTED').length;
+    const cancelled = bookings.filter((b) => b.status === 'CANCELLED').length;
 
     return (
         <div className="mybookings-container">
             <button className="action-button approve" style={{marginBottom: '1.5rem'}} onClick={() => setShowBookingModal(true)}>
-                Book Resource
+                + Book Resource
             </button>
+            
             {/* Page Header */}
             <div className="mybookings-header">
                 <h1 className="mybookings-title">My Bookings</h1>
@@ -125,7 +100,7 @@ const MyBookings = () => {
                 <div className="summary-card total">
                     <div className="icon">📅</div>
                     <div className="count">{total}</div>
-                    <div className="label">Total Bookings</div>
+                    <div className="label">Total</div>
                 </div>
                 <div className="summary-card pending">
                     <div className="icon">⏳</div>
@@ -166,7 +141,7 @@ const MyBookings = () => {
                         )}
                         {bookings.map((b, idx) => (
                             <tr key={b.id} className={idx % 2 === 1 ? 'striped' : ''}>
-                                <td>{b.resourceName}</td>
+                                <td><strong>{b.resourceName}</strong></td>
                                 <td>{b.purpose || 'N/A'}</td>
                                 <td>{formatDateTime(b.startTime)}</td>
                                 <td>{formatDateTime(b.endTime)}</td>
@@ -182,7 +157,7 @@ const MyBookings = () => {
                                             </button>
                                         )}
                                         <button
-                                            className="action-button approve"
+                                            className="action-button edit"
                                             style={{ background: '#fffbe6', color: '#b26a00', border: '1.5px solid #ffe6b3', fontWeight: 600, padding: '6px 16px', borderRadius: 6, cursor: 'pointer' }}
                                             onClick={() => { setEditBooking(b); setShowBookingModal(true); }}
                                         >

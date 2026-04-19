@@ -78,7 +78,12 @@ function App() {
       return (
         <TicketDetailsPage
           ticket={selectedTicket}
-          onBack={() => setSelectedTicket(null)}
+          onBack={(deleted = false) => {
+            setSelectedTicket(null);
+            if (deleted) {
+              setTicketRefreshKey((k) => k + 1);
+            }
+          }}
         />
       );
     }

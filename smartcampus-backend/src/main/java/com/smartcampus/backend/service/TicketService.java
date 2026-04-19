@@ -9,6 +9,7 @@ import com.smartcampus.backend.entity.*;
 import com.smartcampus.backend.exception.BadRequestException;
 import com.smartcampus.backend.exception.ResourceNotFoundException;
 import com.smartcampus.backend.repository.AttachmentRepository;
+import com.smartcampus.backend.repository.CommentRepository;
 import com.smartcampus.backend.repository.TicketRepository;
 import com.smartcampus.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,16 +36,19 @@ public class TicketService {
     private final TicketRepository     ticketRepository;
     private final UserRepository       userRepository;
     private final AttachmentRepository attachmentRepository;
+    private final CommentRepository    commentRepository;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     public TicketService(TicketRepository ticketRepository,
                          UserRepository userRepository,
-                         AttachmentRepository attachmentRepository) {
+                         AttachmentRepository attachmentRepository,
+                         CommentRepository commentRepository) {
         this.ticketRepository     = ticketRepository;
         this.userRepository       = userRepository;
         this.attachmentRepository = attachmentRepository;
+        this.commentRepository    = commentRepository;
     }
 
     // ── Allowed status transitions ────────────────────────────
@@ -215,7 +219,10 @@ public class TicketService {
     // ──────────────────────────────────────────────────────────
 
     public void deleteTicket(String id) {
-        ticketRepository.delete(findOrThrow(id));
+        Ticket ticket = findOrThrow(id);
+        commentRepository.deleteByTicketId(id);
+        attachmentRepository.deleteByTicketId(id);
+        ticketRepository.delete(ticket);
     }
 
     // ──────────────────────────────────────────────────────────

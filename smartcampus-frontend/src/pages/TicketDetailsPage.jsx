@@ -47,6 +47,7 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
   const [ticket,   setTicket]   = useState(initialTicket);
   const [comments, setComments] = useState(initialTicket.comments ?? []);
   const [loading,  setLoading]  = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fmtDate = (iso) =>
     iso
@@ -77,6 +78,22 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket.id]);
 
+  const handleDelete = async () => {
+    const confirmed = window.confirm('Are you sure you want to delete this ticket? This will also remove related comments and attachments.');
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await ticketService.deleteTicket(ticket.id);
+      onBack(true);
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Failed to delete ticket.';
+      window.alert(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div>
       {/* Back button */}
@@ -105,6 +122,23 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
               </span>
             </div>
           </div>
+
+          {isStaff && (
+            <button
+              type="button"
+              className="btn"
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{
+                borderColor: '#dc2626',
+                color: '#dc2626',
+                background: '#fff5f5',
+                minWidth: 120,
+              }}
+            >
+              {deleting ? 'Deleting...' : 'Delete Ticket'}
+            </button>
+          )}
         </div>
       </div>
 

@@ -10,4 +10,7 @@ import java.util.List;
 public interface CommentRepository extends MongoRepository<Comment, String> {
     /** Returns all comments for a given ticket, ordered by creation time */
     List<Comment> findByTicketIdOrderByCreatedAtAsc(String ticketId);
+
+    /** Deletes all comments associated with a ticket */
+    void deleteByTicketId(String ticketId);
 }

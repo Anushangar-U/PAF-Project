@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface AttachmentRepository extends MongoRepository<Attachment, String> {
     List<Attachment> findByTicketId(String ticketId);
+
+    void deleteByTicketId(String ticketId);
 }

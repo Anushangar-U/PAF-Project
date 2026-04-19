@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
  */
 public class CommentRequest {
 
-    private Long ticketId;
+    private String ticketId;
 
     @NotBlank(message = "Author name is required")
     private String authorName;
@@ -18,8 +18,8 @@ public class CommentRequest {
     @NotBlank(message = "Comment content cannot be empty")
     private String content;
 
-    public Long getTicketId()              { return ticketId; }
-    public void setTicketId(Long t)        { this.ticketId = t; }
+    public String getTicketId()            { return ticketId; }
+    public void setTicketId(String t)      { this.ticketId = t; }
     public String getAuthorName()          { return authorName; }
     public void setAuthorName(String n)    { this.authorName = n; }
     public String getAuthorRole()          { return authorRole; }

@@ -53,14 +53,14 @@ class ResourceServiceTest {
     @Test
     void getResourceById_returnsOptionalFromRepository() {
         Resource resource = new Resource();
-        resource.setId(7L);
-        when(resourceRepository.findById(7L)).thenReturn(Optional.of(resource));
+        resource.setId("7");
+        when(resourceRepository.findById("7")).thenReturn(Optional.of(resource));
 
-        Optional<Resource> result = resourceService.getResourceById(7L);
+        Optional<Resource> result = resourceService.getResourceById("7");
 
         assertTrue(result.isPresent());
-        assertEquals(7L, result.get().getId());
-        verify(resourceRepository).findById(7L);
+        assertEquals("7", result.get().getId());
+        verify(resourceRepository).findById("7");
     }
 
     @Test
@@ -79,8 +79,8 @@ class ResourceServiceTest {
 
     @Test
     void deleteResource_callsRepositoryDeleteById() {
-        resourceService.deleteResource(99L);
+        resourceService.deleteResource("99");
 
-        verify(resourceRepository).deleteById(99L);
+        verify(resourceRepository).deleteById("99");
     }
 }

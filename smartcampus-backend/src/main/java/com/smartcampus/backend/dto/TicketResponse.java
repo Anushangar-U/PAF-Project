@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class TicketResponse {
 
-    private Long id;
+    private String id;
     private String title;
     private String description;
     private String location;
@@ -33,13 +33,13 @@ public class TicketResponse {
 
     /** Inner summary mirrors the { name, role } shape the frontend reads */
     public static class UserSummary {
-        private Long id;
+        private String id;
         private String name;
         private String email;
         private UserRole role;
 
-        public Long getId()             { return id; }
-        public void setId(Long id)      { this.id = id; }
+        public String getId()           { return id; }
+        public void setId(String id)    { this.id = id; }
         public String getName()         { return name; }
         public void setName(String n)   { this.name = n; }
         public String getEmail()        { return email; }
@@ -65,27 +65,21 @@ public class TicketResponse {
         r.createdAt = t.getCreatedAt();
         r.updatedAt = t.getUpdatedAt();
 
-        if (t.getReportedBy() != null) {
+        if (t.getReportedById() != null) {
             UserSummary u = new UserSummary();
-            u.id = t.getReportedBy().getId();
-            u.name = t.getReportedBy().getName();
-            u.email = t.getReportedBy().getEmail();
-            u.role = t.getReportedBy().getRole();
+            u.id = t.getReportedById();
+            u.name = t.getReportedByName();
+            u.email = t.getReportedByEmail();
+            u.role = t.getReportedByRole();
             r.reportedBy = u;
-        }
-
-        if (t.getAttachments() != null) {
-            r.attachmentUrls = t.getAttachments().stream()
-                .map(Attachment::getFileUrl)
-                .toList();
         }
 
         return r;
     }
 
     // ── Getters & Setters ──────────────────────────────────────
-    public Long getId()                              { return id; }
-    public void setId(Long id)                       { this.id = id; }
+    public String getId()                            { return id; }
+    public void setId(String id)                     { this.id = id; }
     public String getTitle()                         { return title; }
     public void setTitle(String t)                   { this.title = t; }
     public String getDescription()                   { return description; }

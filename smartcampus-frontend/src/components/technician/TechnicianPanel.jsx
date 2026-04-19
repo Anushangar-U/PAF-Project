@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StatusUpdater  from './StatusUpdater';
 import ResolutionForm from './ResolutionForm';
-import ticketService  from '../../services/ticketService';
+import ticketService  from '../../services/TicketService';
 
 /**
  * TechnicianPanel

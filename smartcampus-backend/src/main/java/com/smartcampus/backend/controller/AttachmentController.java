@@ -48,7 +48,7 @@ public class AttachmentController {
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<List<AttachmentResponse>> uploadAttachments(
-            @PathVariable Long ticketId,
+            @PathVariable String ticketId,
             @RequestParam("files") List<MultipartFile> files
     ) {
         List<AttachmentResponse> saved = ticketService.addAttachments(ticketId, files);
@@ -66,7 +66,7 @@ public class AttachmentController {
      */
     @GetMapping("/api/tickets/{ticketId}/attachments")
     public ResponseEntity<List<AttachmentResponse>> getAttachments(
-            @PathVariable Long ticketId
+            @PathVariable String ticketId
     ) {
         return ResponseEntity.ok(ticketService.getAttachments(ticketId));
     }
@@ -81,7 +81,7 @@ public class AttachmentController {
      * Returns 404 NOT FOUND if the attachment does not exist.
      */
     @DeleteMapping("/api/attachments/{attachmentId}")
-    public ResponseEntity<Void> deleteAttachment(@PathVariable Long attachmentId) {
+    public ResponseEntity<Void> deleteAttachment(@PathVariable String attachmentId) {
         ticketService.deleteAttachment(attachmentId);
         return ResponseEntity.noContent().build();
     }

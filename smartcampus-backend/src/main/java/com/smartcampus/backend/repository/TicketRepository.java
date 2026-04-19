@@ -4,16 +4,16 @@ import com.smartcampus.backend.entity.Ticket;
 import com.smartcampus.backend.entity.TicketStatus;
 import com.smartcampus.backend.entity.Priority;
 import com.smartcampus.backend.entity.Category;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface TicketRepository extends JpaRepository<Ticket, Long> {
+public interface TicketRepository extends MongoRepository<Ticket, String> {
 
     /** All tickets reported by a specific user */
-    List<Ticket> findByReportedById(Long userId);
+    List<Ticket> findByReportedById(String userId);
 
     /** Filter by status */
     List<Ticket> findByStatus(TicketStatus status);

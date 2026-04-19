@@ -13,7 +13,6 @@ import com.smartcampus.backend.repository.TicketRepository;
 import com.smartcampus.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -61,7 +60,6 @@ public class TicketService {
     // READ
     // ──────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
     public List<TicketResponse> getAllTickets() {
         return ticketRepository.findAll()
             .stream()
@@ -73,7 +71,6 @@ public class TicketService {
      * Filter tickets by status and/or priority (query-param support).
      * Any null param means "no filter on that field".
      */
-    @Transactional(readOnly = true)
     public List<TicketResponse> getFilteredTickets(String statusStr, String priorityStr) {
         List<Ticket> tickets;
 
@@ -94,8 +91,7 @@ public class TicketService {
         return tickets.stream().map(this::enrichWithSLA).toList();
     }
 
-    @Transactional(readOnly = true)
-    public TicketResponse getTicketById(Long id) {
+    public TicketResponse getTicketById(String id) {
         return enrichWithSLA(findOrThrow(id));
     }
 
@@ -103,12 +99,11 @@ public class TicketService {
     // CREATE
     // ──────────────────────────────────────────────────────────
 
-    @Transactional
     public TicketResponse createTicket(
             String title, String description, String location,
             String categoryStr, String priorityStr,
             String contactName, String contactEmail,
-            Long reportedById, List<MultipartFile> attachmentFiles
+            String reportedById, List<MultipartFile> attachmentFiles
     ) {
         if (attachmentFiles != null && attachmentFiles.size() > 3) {
             throw new BadRequestException("Maximum 3 attachments allowed per ticket.");
@@ -126,7 +121,12 @@ public class TicketService {
         ticket.setContactEmail(contactEmail);
 
         if (reportedById != null) {
-            userRepository.findById(reportedById).ifPresent(ticket::setReportedBy);
+            userRepository.findById(reportedById).ifPresent(reporter -> {
+                ticket.setReportedById(reporter.getId());
+                ticket.setReportedByName(reporter.getName());
+                ticket.setReportedByEmail(reporter.getEmail());
+                ticket.setReportedByRole(reporter.getRole());
+            });
         }
 
         Ticket saved = ticketRepository.save(ticket);
@@ -140,9 +140,8 @@ public class TicketService {
                         att.setFileName(file.getOriginalFilename());
                         att.setFileType(file.getContentType());
                         att.setFileUrl(url);
-                        att.setTicket(saved);
+                        att.setTicketId(saved.getId());
                         attachmentRepository.save(att);
-                        saved.getAttachments().add(att);
                     } catch (IOException e) {
                         throw new BadRequestException("Could not store file: " + e.getMessage());
                     }
@@ -157,8 +156,7 @@ public class TicketService {
     // PATCH – status, assign, resolve
     // ──────────────────────────────────────────────────────────
 
-    @Transactional
-    public TicketResponse updateStatus(Long id, TicketStatusUpdateRequest req) {
+    public TicketResponse updateStatus(String id, TicketStatusUpdateRequest req) {
         Ticket ticket        = findOrThrow(id);
         TicketStatus current = ticket.getStatus();
         TicketStatus next    = req.getStatus();
@@ -183,8 +181,7 @@ public class TicketService {
      * PATCH /api/tickets/{id}/assign
      * Assigns a technician by ID – looks them up to store their name.
      */
-    @Transactional
-    public TicketResponse assignTechnician(Long id, AssignTechnicianRequest req) {
+    public TicketResponse assignTechnician(String id, AssignTechnicianRequest req) {
         Ticket ticket = findOrThrow(id);
 
         String techName = userRepository.findById(req.getTechnicianId())
@@ -206,8 +203,7 @@ public class TicketService {
      * PATCH /api/tickets/{id}/resolve
      * Sets resolution notes and marks the ticket RESOLVED.
      */
-    @Transactional
-    public TicketResponse resolveTicket(Long id, ResolveRequest req) {
+    public TicketResponse resolveTicket(String id, ResolveRequest req) {
         Ticket ticket = findOrThrow(id);
         ticket.setResolutionNotes(req.getResolutionNotes());
         ticket.setStatus(TicketStatus.RESOLVED);
@@ -218,8 +214,7 @@ public class TicketService {
     // DELETE
     // ──────────────────────────────────────────────────────────
 
-    @Transactional
-    public void deleteTicket(Long id) {
+    public void deleteTicket(String id) {
         ticketRepository.delete(findOrThrow(id));
     }
 
@@ -231,8 +226,7 @@ public class TicketService {
      * POST /api/tickets/{id}/attachments
      * Uploads files and stores them; enforces max-3 rule per ticket.
      */
-    @Transactional
-    public List<AttachmentResponse> addAttachments(Long ticketId, List<MultipartFile> files) {
+    public List<AttachmentResponse> addAttachments(String ticketId, List<MultipartFile> files) {
         Ticket ticket = findOrThrow(ticketId);
 
         int currentCount = attachmentRepository.findByTicketId(ticketId).size();
@@ -254,7 +248,7 @@ public class TicketService {
                     att.setFileName(file.getOriginalFilename());
                     att.setFileType(file.getContentType());
                     att.setFileUrl(url);
-                    att.setTicket(ticket);
+                    att.setTicketId(ticket.getId());
                     Attachment saved = attachmentRepository.save(att);
                     responses.add(AttachmentResponse.from(saved));
                 } catch (IOException e) {
@@ -268,8 +262,7 @@ public class TicketService {
     /**
      * GET /api/tickets/{id}/attachments
      */
-    @Transactional(readOnly = true)
-    public List<AttachmentResponse> getAttachments(Long ticketId) {
+    public List<AttachmentResponse> getAttachments(String ticketId) {
         findOrThrow(ticketId); // ensure ticket exists → 404 if not
         return attachmentRepository.findByTicketId(ticketId)
             .stream()
@@ -280,8 +273,7 @@ public class TicketService {
     /**
      * DELETE /api/attachments/{attachmentId}
      */
-    @Transactional
-    public void deleteAttachment(Long attachmentId) {
+    public void deleteAttachment(String attachmentId) {
         Attachment att = attachmentRepository.findById(attachmentId)
             .orElseThrow(() -> new ResourceNotFoundException(
                 "Attachment not found: " + attachmentId));
@@ -298,6 +290,12 @@ public class TicketService {
      */
     private TicketResponse enrichWithSLA(Ticket ticket) {
         TicketResponse response = TicketResponse.from(ticket);
+        response.setAttachmentUrls(
+            attachmentRepository.findByTicketId(ticket.getId())
+                .stream()
+                .map(Attachment::getFileUrl)
+                .toList()
+        );
         response.setSlaStatus(calculateSLAStatus(ticket));
         return response;
     }
@@ -328,7 +326,7 @@ public class TicketService {
         return "NORMAL";
     }
 
-    private Ticket findOrThrow(Long id) {
+    private Ticket findOrThrow(String id) {
         return ticketRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Ticket not found: " + id));
     }
@@ -347,7 +345,7 @@ public class TicketService {
         }
     }
 
-    private String storeFile(Long ticketId, MultipartFile file) throws IOException {
+    private String storeFile(String ticketId, MultipartFile file) throws IOException {
         String subDir  = "tickets/" + ticketId;
         Path   dirPath = Paths.get(uploadDir, subDir);
         Files.createDirectories(dirPath);

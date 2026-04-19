@@ -8,7 +8,6 @@ import com.smartcampus.backend.exception.ResourceNotFoundException;
 import com.smartcampus.backend.repository.CommentRepository;
 import com.smartcampus.backend.repository.TicketRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,8 +34,7 @@ public class CommentService {
 
     // ── GET ──────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
-    public List<Comment> getCommentsByTicket(Long ticketId) {
+    public List<Comment> getCommentsByTicket(String ticketId) {
         ticketRepository.findById(ticketId)
             .orElseThrow(() -> new ResourceNotFoundException("Ticket not found: " + ticketId));
         return commentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
@@ -48,7 +46,6 @@ public class CommentService {
      * Adds a comment to the ticket identified by req.getTicketId().
      * Used by legacy POST /api/comments and new POST /api/tickets/{id}/comments.
      */
-    @Transactional
     public Comment addComment(CommentRequest req) {
         Ticket ticket = ticketRepository.findById(req.getTicketId())
             .orElseThrow(() -> new ResourceNotFoundException("Ticket not found: " + req.getTicketId()));
@@ -57,7 +54,7 @@ public class CommentService {
         comment.setContent(req.getContent());
         comment.setAuthorName(req.getAuthorName());
         comment.setAuthorRole(req.getAuthorRole());
-        comment.setTicket(ticket);
+        comment.setTicketId(ticket.getId());
 
         return commentRepository.save(comment);
     }
@@ -66,16 +63,14 @@ public class CommentService {
      * Convenience overload: adds a comment where the ticketId is supplied
      * via the URL path (used by POST /api/tickets/{ticketId}/comments).
      */
-    @Transactional
-    public Comment addCommentToTicket(Long ticketId, CommentRequest req) {
+    public Comment addCommentToTicket(String ticketId, CommentRequest req) {
         req.setTicketId(ticketId);   // inject path variable into request
         return addComment(req);
     }
 
     // ── PUT ──────────────────────────────────────────────────
 
-    @Transactional
-    public Comment updateComment(Long commentId, CommentUpdateRequest req) {
+    public Comment updateComment(String commentId, CommentUpdateRequest req) {
         Comment comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new ResourceNotFoundException("Comment not found: " + commentId));
         comment.setContent(req.getMessage());
@@ -84,8 +79,7 @@ public class CommentService {
 
     // ── DELETE ───────────────────────────────────────────────
 
-    @Transactional
-    public void deleteComment(Long id) {
+    public void deleteComment(String id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Comment not found: " + id));
         commentRepository.delete(comment);

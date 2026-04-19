@@ -9,8 +9,8 @@ import jakarta.validation.constraints.NotNull;
 public class AssignTechnicianRequest {
 
     @NotNull(message = "technicianId is required")
-    private Long technicianId;
+    private String technicianId;
 
-    public Long getTechnicianId()           { return technicianId; }
-    public void setTechnicianId(Long id)    { this.technicianId = id; }
+    public String getTechnicianId()         { return technicianId; }
+    public void setTechnicianId(String id)  { this.technicianId = id; }
 }

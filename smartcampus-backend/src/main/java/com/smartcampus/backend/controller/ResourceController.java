@@ -36,7 +36,7 @@ public class ResourceController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Resource> updateResource(@PathVariable Long id, @RequestBody Resource resourceDetails) {
+    public ResponseEntity<Resource> updateResource(@PathVariable String id, @RequestBody Resource resourceDetails) {
         Optional<Resource> existingResource = resourceService.getResourceById(id);
         
         if (existingResource.isPresent()) {
@@ -57,7 +57,7 @@ public class ResourceController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteResource(@PathVariable String id) {
         Optional<Resource> existingResource = resourceService.getResourceById(id);
         
         if (existingResource.isPresent()) {

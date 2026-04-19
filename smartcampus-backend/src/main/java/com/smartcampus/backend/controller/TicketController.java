@@ -68,7 +68,7 @@ public class TicketController {
      * Returns 200 OK  or  404 NOT FOUND.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long id) {
+    public ResponseEntity<TicketResponse> getTicketById(@PathVariable String id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
@@ -94,7 +94,7 @@ public class TicketController {
             @RequestParam(value = "priority",     defaultValue = "MEDIUM") String priority,
             @RequestParam(value = "contactName",  required = false)        String contactName,
             @RequestParam(value = "contactEmail", required = false)        String contactEmail,
-            @RequestParam(value = "reportedById", required = false)        Long   reportedById,
+            @RequestParam(value = "reportedById", required = false)        String reportedById,
             @RequestParam(value = "attachments",  required = false)        List<MultipartFile> attachments
     ) {
         TicketResponse created = ticketService.createTicket(
@@ -121,7 +121,7 @@ public class TicketController {
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<TicketResponse> updateStatus(
-            @PathVariable Long id,
+            @PathVariable String id,
             @Valid @RequestBody TicketStatusUpdateRequest request
     ) {
         return ResponseEntity.ok(ticketService.updateStatus(id, request));
@@ -141,7 +141,7 @@ public class TicketController {
      */
     @PatchMapping("/{id}/assign")
     public ResponseEntity<TicketResponse> assignTechnician(
-            @PathVariable Long id,
+            @PathVariable String id,
             @Valid @RequestBody AssignTechnicianRequest request
     ) {
         return ResponseEntity.ok(ticketService.assignTechnician(id, request));
@@ -160,7 +160,7 @@ public class TicketController {
      */
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<TicketResponse> resolveTicket(
-            @PathVariable Long id,
+            @PathVariable String id,
             @Valid @RequestBody ResolveRequest request
     ) {
         return ResponseEntity.ok(ticketService.resolveTicket(id, request));
@@ -175,7 +175,7 @@ public class TicketController {
      * Returns 204 NO CONTENT  or  404 NOT FOUND.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTicket(@PathVariable String id) {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();
     }
@@ -191,7 +191,7 @@ public class TicketController {
      */
     @PostMapping("/{id}/comments")
     public ResponseEntity<com.smartcampus.backend.entity.Comment> addComment(
-            @PathVariable Long id,
+            @PathVariable String id,
             @Valid @RequestBody CommentRequest request
     ) {
         return ResponseEntity
@@ -205,7 +205,7 @@ public class TicketController {
      */
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<com.smartcampus.backend.entity.Comment>> getComments(
-            @PathVariable Long id
+            @PathVariable String id
     ) {
         return ResponseEntity.ok(commentService.getCommentsByTicket(id));
     }

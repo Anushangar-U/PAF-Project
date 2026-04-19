@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AttachmentUploader from './AttachmentUploader';
-import ticketService from '../../services/ticketService';
+import ticketService from '../../services/TicketService';
 import { useAuth } from '../../context/AuthContext';
 import { CATEGORIES, PRIORITY } from '../../utils/constants';
 

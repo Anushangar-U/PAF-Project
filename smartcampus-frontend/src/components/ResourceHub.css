@@ -530,3 +530,101 @@
     font-size: 13px;
   }
 }
+
+/* Booked Status Badge */
+.status-badge.booked {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Booked Stat Card */
+.stat-card.booked {
+  border-bottom: 3px solid #f59e0b;
+}
+
+/* Booked Info Text */
+.item-booked-info {
+  display: block;
+  font-size: 11px;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 6px;
+}
+
+/* Disabled Request Button */
+.btn-request-resource.disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  color: #718096;
+  box-shadow: none;
+}
+
+.btn-request-resource.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: #cbd5e0;
+}
+
+/* Stat Cards */
+.stat-card.available {
+  border-bottom: 3px solid #38a169;
+}
+
+.stat-card.pending {
+  border-bottom: 3px solid #f59e0b;
+}
+
+.stat-card.booked {
+  border-bottom: 3px solid #3b82f6;
+}
+
+.stat-card.out-of-service {
+  border-bottom: 3px solid #e53e3e;
+}
+
+/* Status Badges */
+.status-badge.active {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.booked {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.out_of_service {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+/* Pending Request Button */
+.btn-request-resource.pending {
+  background: #f59e0b;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-request-resource.pending:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Booked Info Text */
+.item-booked-info {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 6px;
+}

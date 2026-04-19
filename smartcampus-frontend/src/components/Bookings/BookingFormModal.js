@@ -1,48 +1,30 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { X } from "lucide-react";
+import { FaTimes, FaCalendarAlt, FaClock, FaUsers, FaBookmark, FaCheckCircle } from 'react-icons/fa';
 import { useAuth } from "../../hooks/useAuth";
+import './BookingFormModal.css';
 
 const API_URL = "http://localhost:9091/api";
+const TEMP_USER_ID = 1;
 
-/* ── shadcn-style input class ─────────────────────────────────────── */
-const inputClass = [
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1",
-  "text-sm shadow-sm transition-colors",
-  "placeholder:text-muted-foreground",
-  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-  "disabled:cursor-not-allowed disabled:opacity-50",
-].join(" ");
-
-const Field = ({ label, htmlFor, children }) => (
-  <div className="space-y-1.5">
-    <label
-      htmlFor={htmlFor}
-      className="text-sm font-medium leading-none text-foreground"
-    >
-      {label}
-    </label>
-    {children}
-  </div>
-);
-
-/* ── component ────────────────────────────────────────────────────── */
-const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) => {
+const BookingFormModal = ({ onClose, onBooked, booking, resource, preSelectedResource }) => {
   const { user } = useAuth();
   const [resources, setResources] = useState([]);
   const [form, setForm] = useState({
-    resourceId: preSelectedResource?.id || booking?.resourceId || "",
-    date: booking?.startTime ? booking.startTime.split("T")[0] : "",
-    startTime: booking?.startTime ? booking.startTime.split("T")[1]?.slice(0, 5) : "",
-    endTime: booking?.endTime ? booking.endTime.split("T")[1]?.slice(0, 5) : "",
+    resourceId: booking?.resourceId || resource?.id || preSelectedResource?.id || "",
+    date: booking?.startTime ? booking.startTime.split('T')[0] : "",
+    startTime: booking?.startTime ? booking.startTime.split('T')[1]?.slice(0,5) : "",
+    endTime: booking?.endTime ? booking.endTime.split('T')[1]?.slice(0,5) : "",
     purpose: booking?.purpose || "",
     attendees: booking?.attendees || "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
+  // Fetch all resources
   useEffect(() => {
     axios
       .get(`${API_URL}/resources`)
@@ -50,6 +32,18 @@ const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) =
       .catch(() => setResources([]));
   }, []);
 
+  // Pre-fill resource if passed
+  useEffect(() => {
+    const selectedResource = resource || preSelectedResource;
+    if (selectedResource && !booking) {
+      setForm(prev => ({
+        ...prev,
+        resourceId: selectedResource.id
+      }));
+    }
+  }, [resource, preSelectedResource, booking]);
+
+  // Fetch booked slots when resource and date are selected
   useEffect(() => {
     if (!form.resourceId || !form.date) {
       setBookedSlots([]);
@@ -75,7 +69,7 @@ const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) =
     setSubmitting(true);
     setError("");
 
-    // Frontend validation: reject past start times
+    // Validation: start time must be in future
     if (form.date && form.startTime) {
       const selected = new Date(`${form.date}T${form.startTime}:00`);
       if (selected < new Date()) {
@@ -85,37 +79,47 @@ const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) =
       }
     }
 
-    // Frontend validation: end must be after start
+    // Validation: end time must be after start time
     if (form.startTime && form.endTime && form.startTime >= form.endTime) {
       setError("End time must be after start time.");
       setSubmitting(false);
       return;
     }
 
-    const userId = user?.id || user?.userId || 1;
+    const userId = user?.id || user?.userId || TEMP_USER_ID;
 
-    const payload = {
+    const bookingData = {
       userId,
       resourceId: form.resourceId,
       startTime: `${form.date}T${form.startTime}:00`,
       endTime: `${form.date}T${form.endTime}:00`,
       purpose: form.purpose,
-      attendees: Number(form.attendees),
+      attendees: parseInt(form.attendees) || 1
     };
 
     try {
       if (booking?.id) {
-        await axios.put(`${API_URL}/bookings/${booking.id}`, payload);
+        await axios.put(`${API_URL}/bookings/${booking.id}`, bookingData);
       } else {
-        await axios.post(`${API_URL}/bookings`, payload);
+        await axios.post(`${API_URL}/bookings`, bookingData);
       }
-      onBooked();
-      onClose();
+      
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+        onBooked();
+      }, 1500);
     } catch (err) {
+      console.error("Error:", err.response?.data);
       const data = err.response?.data;
       let msg = "Failed to submit booking. Please try a different time slot.";
-      if (typeof data === "string" && data) msg = data;
-      else if (data && typeof data === "object") {
+      if (err.response?.status === 409) {
+        msg = "This time slot is already booked. Please choose another time.";
+      } else if (err.response?.status === 400) {
+        msg = "Invalid booking data. Please check all fields.";
+      } else if (typeof data === "string" && data) {
+        msg = data;
+      } else if (data && typeof data === "object") {
         msg = String(data.message || data.error || msg);
       }
       setError(msg);
@@ -124,89 +128,109 @@ const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) =
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
+  const selectedResourceData = resources.find(r => r.id === form.resourceId);
+  const displayResource = resource || preSelectedResource || selectedResourceData;
 
   const formatTime = (t) => {
+    if (!t) return '';
     const [h, m] = t.split(":");
     const hour = parseInt(h, 10);
     return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
   };
 
-  const conflicting =
-    !!form.startTime &&
-    !!form.endTime &&
-    bookedSlots.some(
-      (slot) => form.startTime < slot.endTime && form.endTime > slot.startTime
-    );
+  const conflicting = form.startTime && form.endTime && bookedSlots.some(
+    (slot) => form.startTime < slot.endTime && form.endTime > slot.startTime
+  );
 
-  return (
-    /* Overlay */
-    <div
-      className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      {/*
-        Mobile  → bottom sheet: full width, rounded top corners
-        sm+     → centered card: max-w-lg, fully rounded
-      */}
-      <div className="relative w-full sm:max-w-lg sm:mx-4 bg-background border border-border rounded-t-lg sm:rounded-lg shadow-lg flex flex-col max-h-[92dvh] sm:max-h-[90dvh]">
-
-        {/* Drag handle — mobile only */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-muted sm:hidden" />
-
-        {/* ── Header (outside form, never scrolls) ── */}
-        <div className="flex items-start justify-between px-6 pt-6 pb-4 shrink-0">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold leading-none tracking-tight text-foreground">
-              {booking ? "Edit Booking" : "Book a Resource"}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {booking
-                ? "Update the details below."
-                : "Fill in the details to request a resource."}
-            </p>
+  // Success Screen
+  if (success) {
+    return (
+      <div className="booking-modal-overlay">
+        <div className="booking-modal success-modal">
+          <div className="success-animation">
+            <FaCheckCircle className="success-icon" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ml-4 mt-0.5"
-            aria-label="Close"
-          >
-            <X size={18} className="text-foreground" />
-          </button>
+          <h2>Booking Request Sent!</h2>
+          <p>Your request has been submitted for approval.</p>
+          <p className="success-note">You'll be notified once it's processed.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Form
+  return (
+    <div className="booking-modal-overlay" onClick={onClose}>
+      <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose}>
+          <FaTimes />
+        </button>
+        
+        <div className="modal-header">
+          <div className="modal-header-icon">
+            <FaBookmark />
+          </div>
+          <h2>{booking ? 'Edit Booking' : 'Request Resource'}</h2>
+          <p className="modal-subtitle">
+            {displayResource 
+              ? `You're requesting: ${displayResource.name}`
+              : 'Fill in the details to request a resource'}
+          </p>
         </div>
 
-        <div className="border-t border-border" />
-
-        {/* ── Form wraps scrollable body + footer ── */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
-
-          {/* Scrollable fields */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-
-            {/* Resource */}
-            <Field label="Resource *" htmlFor="resourceId">
+        <form className="booking-form" onSubmit={handleSubmit}>
+          {/* Resource Selection */}
+          {!displayResource && (
+            <div className="form-field">
+              <label htmlFor="resourceId">
+                <FaBookmark className="field-icon" />
+                Select Resource
+              </label>
               <select
                 id="resourceId"
                 name="resourceId"
                 value={form.resourceId}
                 onChange={handleChange}
                 required
-                className={inputClass}
+                className="form-select"
               >
-                <option value="">Select a resource…</option>
+                <option value="">Choose a resource...</option>
                 {resources
-                  .filter((r) => r.status === "ACTIVE")
+                  .filter(r => r.status === 'ACTIVE')
                   .map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.name} ({r.type})
+                      {r.name} • {r.type} • Capacity: {r.capacity}
                     </option>
                   ))}
               </select>
-            </Field>
+            </div>
+          )}
+          
+          {/* Selected Resource Display */}
+          {displayResource && (
+            <div className="selected-resource-card">
+              <div className="resource-card-icon">
+                <FaBookmark />
+              </div>
+              <div className="resource-card-details">
+                <h3>{displayResource.name}</h3>
+                <span className="resource-badge">{displayResource.type}</span>
+                <div className="resource-meta">
+                  <span>📍 {displayResource.location}</span>
+                  <span>👥 Capacity: {displayResource.capacity}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
-            {/* Date */}
-            <Field label="Date *" htmlFor="date">
+          {/* Date */}
+          <div className="form-row">
+            <div className="form-field">
+              <label htmlFor="date">
+                <FaCalendarAlt className="field-icon" />
+                Date
+              </label>
               <input
                 id="date"
                 type="date"
@@ -215,128 +239,148 @@ const BookingFormModal = ({ onClose, onBooked, booking, preSelectedResource }) =
                 onChange={handleChange}
                 required
                 min={today}
-                className={inputClass}
+                className="form-input"
               />
-            </Field>
-
-            {/* Real-time availability panel */}
-            {form.resourceId && form.date && (
-              <div className="rounded-md border border-border bg-muted px-3 py-2.5 space-y-1.5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Availability · {form.date}
-                </p>
-                {loadingSlots ? (
-                  <p className="text-xs text-muted-foreground">Checking availability…</p>
-                ) : bookedSlots.length === 0 ? (
-                  <p className="text-xs font-medium text-foreground">All slots are available</p>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {bookedSlots.map((slot, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center rounded-full border border-destructive/30 bg-destructive/10 px-2.5 py-0.5 text-[11px] font-semibold text-destructive"
-                      >
-                        {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Start / End time — stacked on mobile, side-by-side on sm+ */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field label="Start Time *" htmlFor="startTime">
-                <input
-                  id="startTime"
-                  type="time"
-                  name="startTime"
-                  value={form.startTime}
-                  onChange={handleChange}
-                  required
-                  className={inputClass}
-                />
-              </Field>
-              <Field label="End Time *" htmlFor="endTime">
-                <input
-                  id="endTime"
-                  type="time"
-                  name="endTime"
-                  value={form.endTime}
-                  onChange={handleChange}
-                  required
-                  className={inputClass}
-                />
-              </Field>
             </div>
+          </div>
 
-            {/* Conflict warning */}
-            {conflicting && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm font-medium text-destructive">
-                This time overlaps with an existing booking. Please choose a different slot.
-              </div>
-            )}
+          {/* Availability Panel */}
+          {form.resourceId && form.date && (
+            <div className="availability-panel">
+              <p className="availability-title">
+                📅 Availability · {form.date}
+              </p>
+              {loadingSlots ? (
+                <p className="availability-loading">Checking availability…</p>
+              ) : bookedSlots.length === 0 ? (
+                <p className="availability-available">✅ All slots are available</p>
+              ) : (
+                <div className="booked-slots-list">
+                  {bookedSlots.map((slot, i) => (
+                    <span key={i} className="booked-slot-badge">
+                      {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Purpose */}
-            <Field label="Purpose *" htmlFor="purpose">
+          {/* Time Selection */}
+          <div className="form-row two-col">
+            <div className="form-field">
+              <label htmlFor="startTime">
+                <FaClock className="field-icon" />
+                Start Time
+              </label>
               <input
-                id="purpose"
-                type="text"
-                name="purpose"
-                placeholder="e.g., Lab session, Group study"
-                value={form.purpose}
+                id="startTime"
+                type="time"
+                name="startTime"
+                value={form.startTime}
                 onChange={handleChange}
                 required
-                className={inputClass}
+                className="form-input"
               />
-            </Field>
-
-            {/* Attendees */}
-            <Field label="Number of Attendees *" htmlFor="attendees">
+            </div>
+            <div className="form-field">
+              <label htmlFor="endTime">
+                <FaClock className="field-icon" />
+                End Time
+              </label>
               <input
-                id="attendees"
-                type="number"
-                name="attendees"
-                placeholder="1 – 500"
-                value={form.attendees}
+                id="endTime"
+                type="time"
+                name="endTime"
+                value={form.endTime}
                 onChange={handleChange}
                 required
-                min="1"
-                max="500"
-                className={inputClass}
+                className="form-input"
               />
-            </Field>
+            </div>
+          </div>
 
-            {/* General error */}
-            {error && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm font-medium text-destructive">
-                {error}
-              </div>
+          {/* Conflict Warning */}
+          {conflicting && (
+            <div className="conflict-warning">
+              ⚠️ This time overlaps with an existing booking. Please choose a different slot.
+            </div>
+          )}
+
+          {/* Purpose */}
+          <div className="form-field">
+            <label htmlFor="purpose">
+              <FaBookmark className="field-icon" />
+              Purpose
+            </label>
+            <input
+              id="purpose"
+              type="text"
+              name="purpose"
+              placeholder="e.g., Lab session, Group study, Meeting..."
+              value={form.purpose}
+              onChange={handleChange}
+              required
+              className="form-input"
+            />
+          </div>
+
+          {/* Attendees */}
+          <div className="form-field">
+            <label htmlFor="attendees">
+              <FaUsers className="field-icon" />
+              Number of Attendees
+            </label>
+            <input
+              id="attendees"
+              type="number"
+              name="attendees"
+              placeholder="Enter number of attendees"
+              value={form.attendees}
+              onChange={handleChange}
+              required
+              min="1"
+              max="500"
+              className="form-input"
+            />
+            {selectedResourceData && form.attendees > selectedResourceData.capacity && (
+              <span className="field-warning">
+                ⚠️ Exceeds resource capacity ({selectedResourceData.capacity})
+              </span>
             )}
           </div>
 
-          <div className="border-t border-border" />
+          {/* Error Message */}
+          {error && (
+            <div className="error-message">
+              <FaTimes className="error-icon" />
+              {error}
+            </div>
+          )}
 
-          {/* ── Footer (inside form so submit works, never scrolls) ── */}
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-6 py-4 shrink-0">
-            {/* Cancel — outline variant */}
+          {/* Actions */}
+          <div className="modal-actions">
             <button
               type="button"
+              className="btn-secondary"
               onClick={onClose}
               disabled={submitting}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
             >
               Cancel
             </button>
-            {/* Submit — primary (default) variant */}
             <button
               type="submit"
+              className="btn-primary"
               disabled={submitting || conflicting}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
             >
-              {submitting
-                ? booking ? "Saving…" : "Booking…"
-                : booking ? "Save Changes" : "Book Now"}
+              {submitting ? (
+                <>
+                  <span className="spinner-small"></span>
+                  {booking ? "Saving..." : "Submitting..."}
+                </>
+              ) : (
+                booking ? 'Save Changes' : 'Submit Request'
+              )}
             </button>
           </div>
         </form>

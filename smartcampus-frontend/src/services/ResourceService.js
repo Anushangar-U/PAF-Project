@@ -1,36 +1,43 @@
 import axios from 'axios';
 
-// This is the URL where your Spring Boot server is running!
-const API_BASE_URL = 'http://localhost:9090/api/resources';
+const API_BASE_URL = 'http://localhost:9091/api/resources';
 
 class ResourceService {
+        // Get resource by ID (needed for booking lookups)
+        getResourceById(id) {
+            return axios.get(`${API_BASE_URL}/${id}`);
+        }
     
-    // 1. GET all resources
     getAllResources() {
         return axios.get(API_BASE_URL);
     }
 
-    // 2. GET resources filtered by type (e.g., 'lab')
     getResourcesByType(type) {
         return axios.get(`${API_BASE_URL}?type=${type}`);
     }
-
-    // 3. POST a new resource
-    createResource(resourceData) {
-        return axios.post(API_BASE_URL, resourceData);
+    
+    getResourcesByFacultyId(facultyId) {
+        return axios.get(`${API_BASE_URL}/faculty/${facultyId}`);
+    }
+    
+    getResourcesByFacultyName(facultyName) {
+        return axios.get(`${API_BASE_URL}/faculty/name/${encodeURIComponent(facultyName)}`);
     }
 
-    // 4. PUT update an existing resource
+    createResource(resourceData) {
+        // Don't send ID - MongoDB will generate it
+        const { id, ...dataWithoutId } = resourceData;
+        return axios.post(API_BASE_URL, dataWithoutId);
+    }
+
     updateResource(id, resourceData) {
         return axios.put(`${API_BASE_URL}/${id}`, resourceData);
     }
 
-    // 5. DELETE a resource
     deleteResource(id) {
         return axios.delete(`${API_BASE_URL}/${id}`);
     }
 }
 
-// Export a single instance of this service so we can use it anywhere
 const resourceServiceInstance = new ResourceService();
 export default resourceServiceInstance;

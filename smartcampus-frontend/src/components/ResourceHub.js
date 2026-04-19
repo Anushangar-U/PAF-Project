@@ -17,6 +17,7 @@ import {
 import { RiOrganizationChart } from 'react-icons/ri';
 import ResourceService from '../services/ResourceService';
 import AddResourceForm from './AddResourceForm';
+import BookingFormModal from './Bookings/BookingFormModal';
 import { useAuth } from '../hooks/useAuth';
 import './ResourceHub.css';
 
@@ -62,6 +63,7 @@ const ResourceHub = ({ facultyId, facultyName }) => {
   const [selectedType, setSelectedType] = useState('All');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
+  const [bookingResource, setBookingResource] = useState(null);
 
   const fetchResources = useCallback(async () => {
     try {
@@ -89,10 +91,8 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     fetchResources();
   }, [fetchResources]);
 
-  // Handle requesting ANY resource (not just equipment)
   const handleRequestResource = (resource) => {
-    const resourceTypeLabel = resource.type || 'Resource';
-    alert(`📋 Booking Request Submitted\n\nResource: ${resource.name}\nType: ${resourceTypeLabel}\nLocation: ${resource.location}\nCapacity: ${resource.capacity > 0 ? resource.capacity : 'N/A'}\n\nYour booking request has been sent for approval. You will be notified once it's processed.`);
+    setBookingResource(resource);
   };
 
   // Handle edit resource (Admin only)
@@ -172,6 +172,13 @@ const ResourceHub = ({ facultyId, facultyName }) => {
 
   return (
     <div className="resource-hub-container">
+      {bookingResource && (
+        <BookingFormModal
+          preSelectedResource={bookingResource}
+          onClose={() => setBookingResource(null)}
+          onBooked={() => setBookingResource(null)}
+        />
+      )}
       {/* Admin Toolbar */}
       {!authLoading && isAdmin && (
         <div className="admin-toolbar">

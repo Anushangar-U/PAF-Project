@@ -6,8 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -85,6 +88,20 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    public List<Map<String, String>> getBookedSlots(String resourceId, String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        LocalDateTime dayStart = localDate.atStartOfDay();
+        LocalDateTime dayEnd = localDate.plusDays(1).atStartOfDay();
+
+        return bookingRepository.findApprovedBookingsForResourceOnDate(resourceId, dayStart, dayEnd)
+                .stream()
+                .map(b -> Map.of(
+                        "startTime", b.getStartTime().toLocalTime().toString(),
+                        "endTime", b.getEndTime().toLocalTime().toString()
+                ))
+                .collect(Collectors.toList());
+    }
+
     private void validateBooking(Booking booking) {
         if (booking.getUserId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
@@ -98,8 +115,8 @@ public class BookingService {
         if (!booking.getStartTime().isBefore(booking.getEndTime())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time must be before end time");
         }
-        if (booking.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking cannot be created for a past time");
+        if (booking.getStartTime().isBefore(LocalDateTime.now().minusMinutes(5))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking cannot be created for a past time. Please select a future date and time.");
         }
     }
 }

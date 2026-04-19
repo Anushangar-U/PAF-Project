@@ -1,79 +1,19 @@
-
-/* Sidebar Layout */
+/* App layout wrapper for sidebar pages */
 .app-layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 230px;
-    background: #1a2233;
-    color: #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 2rem 1rem 1rem 1.5rem;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
-}
-
-.sidebar-header {
-    margin-bottom: 2.5rem;
-    text-align: left;
-}
-
-.sidebar-logo {
-    font-size: 2rem;
-    color: #60a5fa;
-    display: block;
-}
-
-.sidebar-title {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #60a5fa;
-    display: block;
-}
-
-.sidebar-subtitle {
-    font-size: 0.85rem;
-    color: #94a3b8;
-    display: block;
-    margin-top: 0.2rem;
-}
-
-.sidebar nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-}
-
-.sidebar nav li {
-    margin-bottom: 1.2rem;
-}
-
-.sidebar nav a {
-    color: #e2e8f0;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1.08rem;
-    padding: 0.7rem 1.2rem;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    transition: background 0.18s, color 0.18s;
-}
-
-.sidebar nav a.active,
-.sidebar nav a:hover {
-    background: #2563eb;
-    color: #fff;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .main-content {
-    flex: 1;
-    padding: 2.5rem 2rem 2rem 2rem;
-    background: #f6f8fc;
-    min-height: 100vh;
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Offset mobile content so hamburger button doesn't overlap */
+@media (max-width: 767px) {
+  .main-content {
+    padding-top: 3.5rem;
+  }
 }

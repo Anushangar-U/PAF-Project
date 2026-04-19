@@ -6,7 +6,7 @@ import {
   FaHome, 
   FaCalendarCheck,
   FaUserShield,
-  FaArrowLeft
+  FaDownload
 } from 'react-icons/fa';
 import axios from 'axios';
 import Dashboard from './components/Dashboard';
@@ -34,9 +34,12 @@ const FacultiesPage = () => {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section - Same style as About/Contact */}
         <div className="py-20" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
+            <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}>
+              Academic Resources
+            </div>
             <h1 className="text-5xl font-extrabold tracking-tight text-white">
               Explore Our Faculties
             </h1>
@@ -62,7 +65,6 @@ const FacultiesPage = () => {
           </div>
         </div>
 
-        {/* Stats Bar - Same style as About/Contact */}
         <div className="bg-slate-100 py-12 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -81,7 +83,6 @@ const FacultiesPage = () => {
           </div>
         </div>
 
-        {/* Dashboard Content */}
         <div className="bg-slate-50 py-8">
           <div className="max-w-7xl mx-auto px-8">
             <Dashboard />
@@ -103,7 +104,6 @@ const MyBookingsPage = () => {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
         <div className="py-20" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
             <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
@@ -119,7 +119,6 @@ const MyBookingsPage = () => {
           </div>
         </div>
 
-        {/* MyBookings Content */}
         <div className="bg-slate-50 py-8">
           <div className="max-w-7xl mx-auto px-8">
             <MyBookings />
@@ -133,34 +132,223 @@ const MyBookingsPage = () => {
 };
 
 // ============================================ //
-// ADMIN OVERVIEW COMPONENT                     //
+// ADMIN OVERVIEW COMPONENT (WITH ALL FACULTIES)//
 // ============================================ //
 const AdminOverview = ({ setAdminSection }) => {
+  const [stats, setStats] = useState({
+    totalResources: 0,
+    pendingBookings: 0,
+    approvedBookings: 0,
+    loading: true
+  });
+
+  const [analytics, setAnalytics] = useState({
+    allFaculties: [],
+    utilizationRate: 0,
+    activeResources: 0,
+    bookedResources: 0,
+    loadingAnalytics: true
+  });
+
+  useEffect(() => {
+    fetchStats();
+    fetchAnalytics();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [resourcesRes, bookingsRes] = await Promise.all([
+        axios.get('http://localhost:9091/api/resources'),
+        axios.get('http://localhost:9091/api/bookings')
+      ]);
+
+      const totalResources = resourcesRes.data.length;
+      const bookings = bookingsRes.data;
+      
+      const pendingBookings = bookings.filter(b => b.status === 'PENDING').length;
+      const approvedBookings = bookings.filter(b => b.status === 'APPROVED').length;
+
+      setStats({
+        totalResources,
+        pendingBookings,
+        approvedBookings,
+        loading: false
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setStats(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const [resourcesRes, bookingsRes] = await Promise.all([
+        axios.get('http://localhost:9091/api/resources'),
+        axios.get('http://localhost:9091/api/bookings')
+      ]);
+
+      const resources = resourcesRes.data;
+      const bookings = bookingsRes.data;
+      const approvedBookings = bookings.filter(b => b.status === 'APPROVED');
+
+      // Count bookings per faculty
+      const facultyBookingCount = {};
+      
+      approvedBookings.forEach(booking => {
+        const resource = resources.find(r => r.id === booking.resourceId);
+        const facultyName = resource?.facultyName || 'Unknown';
+        facultyBookingCount[facultyName] = (facultyBookingCount[facultyName] || 0) + 1;
+      });
+
+      // Get ALL faculties with their stats
+      const allFaculties = Object.entries(facultyBookingCount)
+        .sort((a, b) => b[1] - a[1])
+        .map(([facultyName, count]) => ({
+          name: facultyName,
+          bookings: count,
+          totalResources: resources.filter(r => r.facultyName === facultyName).length,
+          activeResources: resources.filter(r => r.facultyName === facultyName && r.status === 'ACTIVE').length
+        }));
+
+      // Add faculties with 0 bookings
+      const facultiesWithResources = [...new Set(resources.map(r => r.facultyName))];
+      facultiesWithResources.forEach(facultyName => {
+        if (!allFaculties.find(f => f.name === facultyName) && facultyName) {
+          allFaculties.push({
+            name: facultyName,
+            bookings: 0,
+            totalResources: resources.filter(r => r.facultyName === facultyName).length,
+            activeResources: resources.filter(r => r.facultyName === facultyName && r.status === 'ACTIVE').length
+          });
+        }
+      });
+
+      // Remove any "Unknown" or empty faculty names
+      const filteredFaculties = allFaculties.filter(f => f.name && f.name !== 'Unknown' && f.name !== 'Unassigned');
+      
+      // Sort by bookings (highest first)
+      filteredFaculties.sort((a, b) => b.bookings - a.bookings);
+
+      // Utilization Rate
+      const activeResources = resources.filter(r => r.status === 'ACTIVE').length;
+      const bookedResources = new Set(approvedBookings.map(b => b.resourceId)).size;
+      const utilizationRate = activeResources > 0 
+        ? Math.round((bookedResources / activeResources) * 100) 
+        : 0;
+
+      setAnalytics({
+        allFaculties: filteredFaculties,
+        utilizationRate,
+        activeResources,
+        bookedResources,
+        loadingAnalytics: false
+      });
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      setAnalytics(prev => ({ ...prev, loadingAnalytics: false }));
+    }
+  };
+
+  if (stats.loading) {
+    return (
+      <div className="admin-overview-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading statistics...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-overview">
+      {/* Stats Cards */}
       <div className="admin-stats-grid">
         <div className="admin-stat-card">
           <div className="admin-stat-icon">📚</div>
-          <div className="admin-stat-value">42</div>
+          <div className="admin-stat-value">{stats.totalResources}</div>
           <div className="admin-stat-label">Total Resources</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-icon">📋</div>
-          <div className="admin-stat-value">8</div>
+          <div className="admin-stat-value">{stats.pendingBookings}</div>
           <div className="admin-stat-label">Pending Bookings</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-icon">✅</div>
-          <div className="admin-stat-value">24</div>
-          <div className="admin-stat-label">Approved</div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-icon">👥</div>
-          <div className="admin-stat-value">156</div>
-          <div className="admin-stat-label">Total Users</div>
+          <div className="admin-stat-value">{stats.approvedBookings}</div>
+          <div className="admin-stat-label">Approved Bookings</div>
         </div>
       </div>
 
+      {/* Analytics Section */}
+      <div className="analytics-section">
+        <h3 className="analytics-section-title">📊 Resource Analytics</h3>
+        
+        <div className="analytics-cards">
+          {/* Utilization Card */}
+          <div className="analytics-card utilization-card">
+            <div className="analytics-card-header">
+              <span className="analytics-icon">📈</span>
+              <h4>Utilization Rate</h4>
+            </div>
+            <div className="utilization-stats">
+              <div className="utilization-main">
+                <span className="utilization-value">{analytics.utilizationRate}%</span>
+                <span className="utilization-label">of active resources booked</span>
+              </div>
+              <div className="utilization-details">
+                <div className="utilization-detail">
+                  <span className="detail-value">{analytics.bookedResources}</span>
+                  <span className="detail-label">Booked</span>
+                </div>
+                <div className="utilization-detail">
+                  <span className="detail-value">{analytics.activeResources}</span>
+                  <span className="detail-label">Active Total</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* All Faculties Ranking Card */}
+          <div className="analytics-card top-faculties-card">
+            <div className="analytics-card-header">
+              <span className="analytics-icon">🏛️</span>
+              <h4>Faculty Rankings by Bookings</h4>
+            </div>
+            {analytics.loadingAnalytics ? (
+              <p className="analytics-loading">Loading...</p>
+            ) : analytics.allFaculties.length === 0 ? (
+              <p className="analytics-empty">No faculties found</p>
+            ) : (
+              <div className="all-faculties-list">
+                {analytics.allFaculties.map((faculty, index) => (
+                  <div key={faculty.name} className={`faculty-rank-item ${faculty.bookings === 0 ? 'no-bookings' : ''}`}>
+                    <div className="faculty-rank-position">
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </div>
+                    <div className="faculty-rank-info">
+                      <span className="faculty-rank-name">{faculty.name}</span>
+                      <div className="faculty-rank-stats">
+                        <span className="faculty-stat">
+                          📚 {faculty.totalResources} total
+                        </span>
+                        <span className="faculty-stat">
+                          🟢 {faculty.activeResources} active
+                        </span>
+                      </div>
+                    </div>
+                    <div className="faculty-rank-bookings">
+                      <span className="rank-booking-count">{faculty.bookings}</span>
+                      <span className="rank-booking-label">bookings</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Cards */}
       <div className="admin-action-cards">
         <div className="admin-action-card" onClick={() => setAdminSection('faculties')}>
           <div className="action-card-icon">🏛️</div>
@@ -188,6 +376,7 @@ const FacultiesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [expandedFaculty, setExpandedFaculty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lastUpdated, setLastUpdated] = useState(new Date());
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -222,11 +411,41 @@ const FacultiesManagement = () => {
     try {
       const response = await axios.get('http://localhost:9091/api/resources');
       setResources(response.data);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching resources:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Resource Name', 'Type', 'Capacity', 'Location', 'Status', 'Faculty', 'Availability Windows'];
+    
+    const rows = resources.map(r => [
+      `"${r.name || ''}"`,
+      `"${r.type || ''}"`,
+      r.capacity || 0,
+      `"${r.location || ''}"`,
+      r.status || 'UNKNOWN',
+      `"${r.facultyName || 'Unassigned'}"`,
+      `"${r.availabilityWindows || 'Not specified'}"`
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `resources_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   const handleDeleteResource = async (resourceId, resourceName) => {
@@ -331,13 +550,25 @@ const FacultiesManagement = () => {
           <div>
             <h2>Faculties Management</h2>
             <p>View and manage all resources across all faculties</p>
+            <p className="last-updated">
+              🕐 Last updated: {lastUpdated.toLocaleString()}
+            </p>
           </div>
-          <button 
-            className="btn-add-resource"
-            onClick={() => setShowAddModal(true)}
-          >
-            + Add New Resource
-          </button>
+          <div className="header-actions">
+            <button 
+              className="btn-export"
+              onClick={exportToCSV}
+              title="Export all resources to CSV"
+            >
+              <FaDownload /> Export CSV
+            </button>
+            <button 
+              className="btn-add-resource"
+              onClick={() => setShowAddModal(true)}
+            >
+              + Add New Resource
+            </button>
+          </div>
         </div>
         
         <div className="faculties-search">
@@ -750,10 +981,10 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         
-        {/* FACULTIES PAGE - WITH HERO SECTION */}
+        {/* FACULTIES PAGE */}
         <Route path="/faculties" element={<FacultiesPage />} />
         
-        {/* MY BOOKINGS PAGE - WITH HERO SECTION */}
+        {/* MY BOOKINGS PAGE */}
         <Route path="/mybookings" element={<MyBookingsPage />} />
         
         {/* ADMIN ROUTE */}

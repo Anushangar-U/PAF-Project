@@ -543,7 +543,7 @@ body {
 /* Admin Overview Stats */
 .admin-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -584,7 +584,7 @@ body {
 /* Admin Action Cards */
 .admin-action-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
@@ -683,6 +683,14 @@ body {
   
   .admin-page-tabs {
     padding: 16px 20px 0 20px;
+    flex-wrap: wrap;
+  }
+  
+  .admin-page-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    flex: 1;
+    justify-content: center;
   }
   
   .admin-page-content {
@@ -692,12 +700,11 @@ body {
   .admin-stats-grid {
     grid-template-columns: 1fr;
   }
-  
-  .admin-page-tab {
-    padding: 12px 20px;
-    font-size: 14px;
-  }
 }
+
+/* ============================================ */
+/* FACULTIES MANAGEMENT                         */
+/* ============================================ */
 .faculties-management {
   background: white;
   border-radius: 20px;
@@ -950,9 +957,9 @@ body {
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
 
-
-/* MODAL STYLE*/
-
+/* ============================================ */
+/* MODAL STYLES                                 */
+/* ============================================ */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1265,12 +1272,10 @@ body {
   min-height: 100vh;
 }
 
-/* Smooth transitions */
 .sidebar-transition {
   transition: all 0.2s ease-in-out;
 }
 
-/* Mobile responsive */
 @media (max-width: 768px) {
   .main-content {
     padding: 20px;
@@ -1305,4 +1310,293 @@ body {
 
 .back-to-home-link:hover {
   color: #0f172a;
+}
+
+/* ============================================ */
+/* EXPORT BUTTON & HEADER ACTIONS               */
+/* ============================================ */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  background: #f8fafc;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.last-updated {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+@media (max-width: 640px) {
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-export,
+  .btn-add-resource {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================ */
+/* ADMIN OVERVIEW LOADING                       */
+/* ============================================ */
+.admin-overview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-overview-loading .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.admin-overview-loading p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ============================================ */
+/* ANALYTICS SECTION                            */
+/* ============================================ */
+.analytics-section {
+  margin-bottom: 40px;
+}
+
+.analytics-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.analytics-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.analytics-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  border: 1px solid #e2e8f0;
+}
+
+.analytics-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.analytics-icon {
+  font-size: 24px;
+}
+
+.analytics-card-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Utilization Card */
+.utilization-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.utilization-main {
+  text-align: center;
+}
+
+.utilization-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: #3b82f6;
+  display: block;
+  line-height: 1.2;
+}
+
+.utilization-label {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.utilization-details {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.utilization-detail {
+  text-align: center;
+}
+
+.detail-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* All Faculties Ranking List */
+.all-faculties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.all-faculties-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.all-faculties-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.all-faculties-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.faculty-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  transition: all 0.2s;
+  border-left: 4px solid #3b82f6;
+}
+
+.faculty-rank-item:hover {
+  background: #f1f5f9;
+  transform: translateX(2px);
+}
+
+.faculty-rank-item.no-bookings {
+  border-left-color: #cbd5e1;
+  opacity: 0.7;
+}
+
+.faculty-rank-position {
+  font-size: 18px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: center;
+  color: #475569;
+}
+
+.faculty-rank-info {
+  flex: 1;
+}
+
+.faculty-rank-name {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.faculty-rank-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.faculty-stat {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.faculty-rank-bookings {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rank-booking-count {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rank-booking-label {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.faculty-rank-item.no-bookings .rank-booking-count {
+  color: #94a3b8;
+}
+
+.analytics-loading,
+.analytics-empty {
+  text-align: center;
+  padding: 30px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .analytics-cards {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
 import { TicketStatusBadge, PriorityBadge } from '../components/tickets/TicketStatusBadge';
 import CommentList    from '../components/comments/CommentList';
 import TechnicianPanel from '../components/technician/TechnicianPanel';
@@ -6,6 +7,7 @@ import ticketService  from '../services/TicketService';
 import commentService from '../services/commentService';
 import { useAuth }    from '../context/AuthContext';
 import { WORKFLOW_STEPS, CATEGORY_ICONS, BACKEND_URL } from '../utils/constants';
+import './TicketDetailsPage.css';
 
 /* ─────────────────────────────────────────
    WorkflowIndicator — 4-step progress bar
@@ -95,7 +97,8 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
   };
 
   return (
-    <div>
+    <Layout>
+      <div className="ticket-details-page">
       {/* Back button */}
       <button id="back-to-tickets-btn" className="back-btn" onClick={onBack}>
         ← Back to Tickets
@@ -304,7 +307,8 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }
 

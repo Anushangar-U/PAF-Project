@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-### Environment ###
+# Local environment variables
 .env
 .env.*
 !.env.example

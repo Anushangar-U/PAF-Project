@@ -3,6 +3,7 @@ import AttachmentUploader from './AttachmentUploader';
 import ticketService from '../../services/TicketService';
 import { useAuth } from '../../context/AuthContext';
 import { CATEGORIES, PRIORITY } from '../../utils/constants';
+import './TicketForm.css';
 
 /**
  * TicketForm
@@ -76,15 +77,15 @@ function TicketForm({ onClose, onCreated }) {
   };
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true">
-      <div className="modal-box">
+    <div className="ticket-form-overlay" role="dialog" aria-modal="true">
+      <div className="ticket-form-box">
 
         {/* Header */}
-        <div className="modal-header">
+        <div className="ticket-form-header">
           <h2>🎫 Report New Incident</h2>
           <button
             id="close-ticket-form-btn"
-            className="modal-close"
+            className="ticket-form-close"
             onClick={onClose}
             disabled={submitting}
             aria-label="Close"
@@ -94,12 +95,12 @@ function TicketForm({ onClose, onCreated }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="modal-body">
+          <div className="ticket-form-body">
 
             {/* Title */}
-            <div className="form-field">
+            <div className="ticket-form-field">
               <label>
-                Title <span className="required-star">*</span>
+                Title <span className="ticket-form-required">*</span>
               </label>
               <input
                 id="ticket-title"
@@ -110,14 +111,14 @@ function TicketForm({ onClose, onCreated }) {
                 placeholder="Brief description of the problem"
               />
               {errors.title && (
-                <small style={{ color: 'var(--rejected)' }}>{errors.title}</small>
+                <small className="ticket-form-error">{errors.title}</small>
               )}
             </div>
 
             {/* Description */}
-            <div className="form-field">
+            <div className="ticket-form-field">
               <label>
-                Description <span className="required-star">*</span>
+                Description <span className="ticket-form-required">*</span>
               </label>
               <textarea
                 id="ticket-description"
@@ -128,15 +129,15 @@ function TicketForm({ onClose, onCreated }) {
                 rows={4}
               />
               {errors.description && (
-                <small style={{ color: 'var(--rejected)' }}>{errors.description}</small>
+                <small className="ticket-form-error">{errors.description}</small>
               )}
             </div>
 
             {/* Location + Category */}
-            <div className="form-row">
-              <div className="form-field">
+            <div className="ticket-form-row">
+              <div className="ticket-form-field">
                 <label>
-                  Location / Resource <span className="required-star">*</span>
+                  Location / Resource <span className="ticket-form-required">*</span>
                 </label>
                 <input
                   id="ticket-location"
@@ -147,12 +148,12 @@ function TicketForm({ onClose, onCreated }) {
                   placeholder="e.g. Engineering Lab 4"
                 />
                 {errors.location && (
-                  <small style={{ color: 'var(--rejected)' }}>{errors.location}</small>
+                  <small className="ticket-form-error">{errors.location}</small>
                 )}
               </div>
-              <div className="form-field">
+              <div className="ticket-form-field">
                 <label>
-                  Category <span className="required-star">*</span>
+                  Category <span className="ticket-form-required">*</span>
                 </label>
                 <select
                   id="ticket-category"
@@ -168,14 +169,14 @@ function TicketForm({ onClose, onCreated }) {
                   ))}
                 </select>
                 {errors.category && (
-                  <small style={{ color: 'var(--rejected)' }}>{errors.category}</small>
+                  <small className="ticket-form-error">{errors.category}</small>
                 )}
               </div>
             </div>
 
             {/* Priority + Contact Name */}
-            <div className="form-row">
-              <div className="form-field">
+            <div className="ticket-form-row">
+              <div className="ticket-form-field">
                 <label>Priority</label>
                 <select
                   id="ticket-priority"
@@ -188,7 +189,7 @@ function TicketForm({ onClose, onCreated }) {
                   <option value="HIGH">🔴 High</option>
                 </select>
               </div>
-              <div className="form-field">
+              <div className="ticket-form-field">
                 <label>Contact Name</label>
                 <input
                   id="ticket-contact-name"
@@ -202,7 +203,7 @@ function TicketForm({ onClose, onCreated }) {
             </div>
 
             {/* Contact Email */}
-            <div className="form-field">
+            <div className="ticket-form-field">
               <label>Contact Email</label>
               <input
                 id="ticket-contact-email"
@@ -215,7 +216,7 @@ function TicketForm({ onClose, onCreated }) {
             </div>
 
             {/* Attachments */}
-            <div className="form-field">
+            <div className="ticket-form-field">
               <label>Attachments (max 3 images)</label>
               <AttachmentUploader images={images} setImages={setImages} />
             </div>
@@ -223,10 +224,10 @@ function TicketForm({ onClose, onCreated }) {
           </div>
 
           {/* Footer */}
-          <div className="modal-footer">
+          <div className="ticket-form-footer">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="ticket-btn ticket-btn-ghost"
               onClick={onClose}
               disabled={submitting}
             >
@@ -235,7 +236,7 @@ function TicketForm({ onClose, onCreated }) {
             <button
               id="submit-ticket-btn"
               type="submit"
-              className="btn btn-primary"
+              className="ticket-btn ticket-btn-primary"
               disabled={submitting}
             >
               {submitting ? '⏳ Submitting…' : '✅ Submit Ticket'}

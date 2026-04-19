@@ -12,12 +12,10 @@ import { useAuth } from '../hooks/useAuth';
 
 const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('dev_isAdmin');
+    logout();
     window.location.href = '/';
   };
 

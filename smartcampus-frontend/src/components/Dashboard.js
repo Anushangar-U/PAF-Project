@@ -620,23 +620,19 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
         </div>
 
         <div className="faculty-info-layout">
-          {/* Sidebar Navigation */}
           <SidebarNav 
             activeSection={activeSection} 
             onSectionChange={setActiveSection}
             themeColor={faculty.themeColor}
           />
 
-          {/* Main Content Area */}
           <div className="info-main-area">
             <div className="info-image">
               <img src={faculty.image} alt={faculty.title} />
             </div>
 
-            {/* Dynamic Content Section */}
             <MainContent faculty={faculty} activeSection={activeSection} />
 
-            {/* Quick Stats with View buttons */}
             <div className="quick-stats-section">
               <h3 style={{ color: faculty.themeColor }}>Quick Stats</h3>
               <div className="stats-grid">
@@ -667,7 +663,6 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
               </div>
             </div>
 
-            {/* Resource Hub Button */}
             <div className="resource-hub-button-container">
               <button 
                 className="resource-hub-image-btn"
@@ -682,7 +677,6 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
             </div>
           </div>
 
-          {/* Right Sidebar - Contact Info */}
           <div className="info-sidebar">
             <div className="info-card">
               <h3 style={{ color: faculty.themeColor }}>Contact Information</h3>
@@ -730,7 +724,6 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
         </div>
       </div>
 
-      {/* Modals */}
       {showStudentList && (
         <StudentListModal faculty={faculty} onClose={() => setShowStudentList(false)} />
       )}
@@ -765,12 +758,6 @@ const Dashboard = ({ renderContent }) => {
   if (selectedFaculty) {
     return (
       <div className="dashboard-container">
-        <nav className="top-navbar">
-          <div className="nav-brand">
-            <FaUniversity className="nav-logo" />
-            <h2>CampusSmart</h2>
-          </div>
-        </nav>
         <main className="main-content">
           <FacultyInfoPage faculty={selectedFaculty} onBack={handleBack} />
         </main>
@@ -780,48 +767,22 @@ const Dashboard = ({ renderContent }) => {
 
   return (
     <div className="dashboard-container">
-      <nav className="top-navbar">
-        <div className="nav-brand">
-          <FaUniversity className="nav-logo" />
-          <h2>CampusSmart</h2>
-        </div>
-        <div className="nav-menu">
-          <div 
-            className={`nav-item ${activeTab === 'faculties' ? 'active' : ''}`}
-            onClick={() => setActiveTab('faculties')}
-          >
-            <FaChalkboardTeacher />
-            <span>Faculties</span>
-          </div>
-        </div>
-      </nav>
-
       <main className="main-content">
         {!renderContent ? (
           <>
             {activeTab === 'faculties' && (
               <>
-                <header className="top-bar">
-                  <div className="page-header-info">
-                    <div className="page-title">
-                      <FaUniversity className="page-title-icon" />
-                      <h1>Academic Faculties</h1>
-                    </div>
-                    <p className="page-subtitle">Explore departments, resources, and allocate smartly</p>
+                {/* Search Bar - Clean, no header */}
+                <div className="search-bar-wrapper">
+                  <div className="search-bar">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search by faculty name or code (e.g., FOC, Engineering)..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                  <div className="summary-badge">
-                    <span><RiOrganizationChart /> 6 Faculties</span>
-                  </div>
-                </header>
-
-                <div className="search-bar">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search by faculty name or code (e.g., FOC, Engineering)..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
                 </div>
 
                 <div className="faculties-grid">

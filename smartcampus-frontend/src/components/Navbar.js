@@ -4,21 +4,17 @@ import { useAuth } from '../hooks/useAuth';
 const NAV = '#0b1628';
 
 const Navbar = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loginAsDemoUser, logout } = useAuth();
   const navigate = useNavigate();
   const isLoggedIn = !!user;
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('dev_isAdmin');
+    logout();
     navigate('/');
   };
 
   const handleSignIn = () => {
-    localStorage.setItem('user', JSON.stringify({ name: 'Student', email: 'student@campus.edu', role: 'USER' }));
-    localStorage.setItem('token', 'mock-user-token');
-    window.location.reload();
+    loginAsDemoUser();
   };
 
   return (
@@ -42,6 +38,8 @@ const Navbar = () => {
           style={{ color: NAV }}>ABOUT</Link>
         <Link to="/faculties" className="font-semibold text-sm transition-colors hover:opacity-70"
           style={{ color: NAV }}>FACULTIES</Link>
+        <Link to="/tickets" className="font-semibold text-sm transition-colors hover:opacity-70"
+          style={{ color: NAV }}>TICKETS</Link>
         <Link to="/contact" className="font-semibold text-sm transition-colors hover:opacity-70"
           style={{ color: NAV }}>CONTACT</Link>
         

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
 import TicketCard from '../components/tickets/TicketCard';
 import ticketService from '../services/TicketService';
 import { DEMO_TICKETS } from '../utils/constants';
+import './TicketListPage.css';
 
 const STATUS_OPTIONS   = ['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
 const PRIORITY_OPTIONS = ['ALL', 'HIGH', 'MEDIUM', 'LOW'];
@@ -65,15 +67,16 @@ function TicketListPage({ onSelect, refreshKey }) {
   ];
 
   return (
-    <div>
+    <Layout>
+      <div className="ticket-list-page">
       {/* ── Stats row ── */}
-      <div className="stats-row">
+      <div className="ticket-list-stats-row">
         {stats.map((s) => (
-          <div className="stat-card" key={s.label}>
-            <div className="stat-icon" style={{ background: s.bg, color: s.color }}>
+          <div className="ticket-list-stat-card" key={s.label}>
+            <div className="ticket-list-stat-icon" style={{ background: s.bg, color: s.color }}>
               {s.icon}
             </div>
-            <div className="stat-info">
+            <div className="ticket-list-stat-info">
               <h3 style={{ color: s.color }}>{s.value}</h3>
               <p>{s.label}</p>
             </div>
@@ -82,8 +85,8 @@ function TicketListPage({ onSelect, refreshKey }) {
       </div>
 
       {/* ── Filter bar ── */}
-      <div className="filter-bar">
-        <div className="search-box">
+      <div className="ticket-list-filter-bar">
+        <div className="ticket-list-search-box">
           <span>🔍</span>
           <input
             id="ticket-search"
@@ -95,7 +98,7 @@ function TicketListPage({ onSelect, refreshKey }) {
         </div>
         <select
           id="filter-status"
-          className="filter-select"
+          className="ticket-list-filter-select"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -107,7 +110,7 @@ function TicketListPage({ onSelect, refreshKey }) {
         </select>
         <select
           id="filter-priority"
-          className="filter-select"
+          className="ticket-list-filter-select"
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
         >
@@ -119,7 +122,7 @@ function TicketListPage({ onSelect, refreshKey }) {
         </select>
         <select
           id="filter-category"
-          className="filter-select"
+          className="ticket-list-filter-select"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -135,19 +138,20 @@ function TicketListPage({ onSelect, refreshKey }) {
       {loading ? (
         <div className="spinner" />
       ) : filtered.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🎫</div>
+        <div className="ticket-list-empty-state">
+          <div className="ticket-list-empty-icon">🎫</div>
           <h3>No tickets found</h3>
           <p>Try adjusting your filters or create a new ticket to get started.</p>
         </div>
       ) : (
-        <div className="tickets-grid">
+        <div className="ticket-list-grid">
           {filtered.map((t) => (
             <TicketCard key={t.id} ticket={t} onClick={onSelect} />
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 }
 

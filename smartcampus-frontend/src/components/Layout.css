@@ -1,0 +1,20 @@
+/* Shared wrapper for Module C pages to keep layout consistent after merges. */
+.app-container.ticket-layout {
+  width: 100%;
+  min-height: 100%;
+  background: #f5f7fa;
+  display: flex;
+  justify-content: center;
+}
+
+.app-container.ticket-layout .content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .app-container.ticket-layout .content-wrapper {
+    padding: 14px;
+  }
+}

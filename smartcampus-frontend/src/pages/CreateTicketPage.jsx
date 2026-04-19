@@ -1,4 +1,5 @@
 import React from 'react';
+import Layout from '../components/Layout';
 import TicketForm from '../components/tickets/TicketForm';
 
 /**
@@ -12,10 +13,14 @@ import TicketForm from '../components/tickets/TicketForm';
  */
 function CreateTicketPage({ onClose, onCreated }) {
   return (
-    <TicketForm
-      onClose={onClose}
-      onCreated={onCreated}
-    />
+    <Layout>
+      <div className="ticket-create-page">
+        <TicketForm
+          onClose={onClose}
+          onCreated={onCreated}
+        />
+      </div>
+    </Layout>
   );
 }
 

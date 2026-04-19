@@ -5,7 +5,7 @@ import TechnicianPanel from '../components/technician/TechnicianPanel';
 import ticketService  from '../services/TicketService';
 import commentService from '../services/commentService';
 import { useAuth }    from '../context/AuthContext';
-import { WORKFLOW_STEPS, CATEGORY_ICONS } from '../utils/constants';
+import { WORKFLOW_STEPS, CATEGORY_ICONS, BACKEND_URL } from '../utils/constants';
 
 /* ─────────────────────────────────────────
    WorkflowIndicator — 4-step progress bar
@@ -186,10 +186,10 @@ function TicketDetailsPage({ ticket: initialTicket, onBack }) {
                   {ticket.attachmentUrls.map((url, i) => (
                     <img
                       key={i}
-                      src={url}
+                      src={`${BACKEND_URL}${url}`}
                       alt={`Attachment ${i + 1}`}
                       className="attachment-thumb"
-                      onClick={() => window.open(url, '_blank')}
+                      onClick={() => window.open(`${BACKEND_URL}${url}`, '_blank')}
                     />
                   ))}
                 </div>

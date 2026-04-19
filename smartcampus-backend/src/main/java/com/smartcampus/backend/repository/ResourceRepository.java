@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ResourceRepository extends MongoRepository<Resource, String> {  // Change Long to String
+public interface ResourceRepository extends MongoRepository<Resource, String> {
+    
     
     List<Resource> findByType(String type);
+    
     List<Resource> findByStatus(String status);
+    
     List<Resource> findByTypeAndStatus(String type, String status);
-    List<Resource> findByFacultyId(String facultyId);
-    List<Resource> findByFacultyName(String facultyName);
 }

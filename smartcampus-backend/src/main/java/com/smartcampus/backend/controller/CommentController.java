@@ -39,7 +39,7 @@ public class CommentController {
      * 200 OK – returns list of comments for a ticket
      */
     @GetMapping("/ticket/{ticketId}")
-    public ResponseEntity<List<Comment>> getCommentsByTicket(@PathVariable Long ticketId) {
+    public ResponseEntity<List<Comment>> getCommentsByTicket(@PathVariable String ticketId) {
         return ResponseEntity.ok(commentService.getCommentsByTicket(ticketId));
     }
 
@@ -61,7 +61,7 @@ public class CommentController {
      */
     @PutMapping("/{commentId}")
     public ResponseEntity<Comment> updateComment(
-            @PathVariable Long commentId,
+            @PathVariable String commentId,
             @Valid @RequestBody CommentUpdateRequest request
     ) {
         return ResponseEntity.ok(commentService.updateComment(commentId, request));
@@ -72,7 +72,7 @@ public class CommentController {
      * 204 NO CONTENT
      */
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteComment(@PathVariable String commentId) {
         commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }

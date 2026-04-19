@@ -30,7 +30,7 @@ public class FileController {
      */
     @GetMapping("/tickets/{ticketId}/{filename}")
     public ResponseEntity<byte[]> getFile(
-            @PathVariable Long ticketId,
+            @PathVariable String ticketId,
             @PathVariable String filename
     ) throws IOException {
         Path filePath = Paths.get(uploadDir, "tickets", String.valueOf(ticketId), filename);

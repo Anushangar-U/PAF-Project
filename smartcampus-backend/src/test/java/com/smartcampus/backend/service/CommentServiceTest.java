@@ -37,11 +37,11 @@ class CommentServiceTest {
 
     @Test
     void getCommentsByTicket_throwsWhenTicketMissing() {
-        when(ticketRepository.findById(10L)).thenReturn(Optional.empty());
+        when(ticketRepository.findById("10")).thenReturn(Optional.empty());
 
         ResourceNotFoundException ex = assertThrows(
             ResourceNotFoundException.class,
-            () -> commentService.getCommentsByTicket(10L)
+            () -> commentService.getCommentsByTicket("10")
         );
 
         assertTrue(ex.getMessage().contains("Ticket not found"));
@@ -49,27 +49,27 @@ class CommentServiceTest {
 
     @Test
     void getCommentsByTicket_returnsCommentsWhenTicketExists() {
-        when(ticketRepository.findById(3L)).thenReturn(Optional.of(new Ticket()));
+        when(ticketRepository.findById("3")).thenReturn(Optional.of(new Ticket()));
         List<Comment> expected = List.of(new Comment(), new Comment());
-        when(commentRepository.findByTicketIdOrderByCreatedAtAsc(3L)).thenReturn(expected);
+        when(commentRepository.findByTicketIdOrderByCreatedAtAsc("3")).thenReturn(expected);
 
-        List<Comment> result = commentService.getCommentsByTicket(3L);
+        List<Comment> result = commentService.getCommentsByTicket("3");
 
         assertEquals(2, result.size());
-        verify(commentRepository).findByTicketIdOrderByCreatedAtAsc(3L);
+        verify(commentRepository).findByTicketIdOrderByCreatedAtAsc("3");
     }
 
     @Test
     void addComment_mapsPayloadAndPersists() {
         Ticket ticket = new Ticket();
-        ticket.setId(7L);
+        ticket.setId("7");
         CommentRequest request = new CommentRequest();
-        request.setTicketId(7L);
+        request.setTicketId("7");
         request.setAuthorName("Ali");
         request.setAuthorRole("USER");
         request.setContent("Need update");
 
-        when(ticketRepository.findById(7L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findById("7")).thenReturn(Optional.of(ticket));
         when(commentRepository.save(any(Comment.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Comment saved = commentService.addComment(request);
@@ -77,42 +77,42 @@ class CommentServiceTest {
         assertEquals("Need update", saved.getContent());
         assertEquals("Ali", saved.getAuthorName());
         assertEquals("USER", saved.getAuthorRole());
-        assertEquals(ticket, saved.getTicket());
+        assertEquals("7", saved.getTicketId());
     }
 
     @Test
     void addCommentToTicket_overridesTicketIdFromPath() {
         Ticket ticket = new Ticket();
-        ticket.setId(11L);
+        ticket.setId("11");
 
         CommentRequest request = new CommentRequest();
-        request.setTicketId(1L);
+        request.setTicketId("1");
         request.setAuthorName("Sara");
         request.setAuthorRole("TECHNICIAN");
         request.setContent("Investigating");
 
-        when(ticketRepository.findById(11L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.findById("11")).thenReturn(Optional.of(ticket));
         when(commentRepository.save(any(Comment.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Comment saved = commentService.addCommentToTicket(11L, request);
+        Comment saved = commentService.addCommentToTicket("11", request);
 
-        assertEquals(11L, request.getTicketId());
-        assertEquals(ticket, saved.getTicket());
+        assertEquals("11", request.getTicketId());
+        assertEquals("11", saved.getTicketId());
     }
 
     @Test
     void updateComment_updatesMessageAndSaves() {
         Comment existing = new Comment();
-        existing.setId(5L);
+        existing.setId("5");
         existing.setContent("Old");
 
         CommentUpdateRequest req = new CommentUpdateRequest();
         req.setMessage("Updated");
 
-        when(commentRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(commentRepository.findById("5")).thenReturn(Optional.of(existing));
         when(commentRepository.save(existing)).thenReturn(existing);
 
-        Comment updated = commentService.updateComment(5L, req);
+        Comment updated = commentService.updateComment("5", req);
 
         assertEquals("Updated", updated.getContent());
         verify(commentRepository).save(existing);
@@ -121,10 +121,10 @@ class CommentServiceTest {
     @Test
     void deleteComment_findsAndDeletes() {
         Comment existing = new Comment();
-        existing.setId(12L);
-        when(commentRepository.findById(12L)).thenReturn(Optional.of(existing));
+        existing.setId("12");
+        when(commentRepository.findById("12")).thenReturn(Optional.of(existing));
 
-        commentService.deleteComment(12L);
+        commentService.deleteComment("12");
 
         verify(commentRepository).delete(existing);
     }

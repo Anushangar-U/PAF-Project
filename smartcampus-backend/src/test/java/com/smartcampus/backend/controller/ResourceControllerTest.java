@@ -66,14 +66,14 @@ class ResourceControllerTest {
     @Test
     void updateResource_whenExists_returnsUpdated() {
         Resource existing = buildResource("Old", "LAB", 10, "L1", "Any", "AVAILABLE");
-        existing.setId(15L);
+        existing.setId("15");
 
         Resource incoming = buildResource("New", "LAB", 25, "L2", "09:00-17:00", "IN_USE");
 
-        when(resourceService.getResourceById(15L)).thenReturn(Optional.of(existing));
+        when(resourceService.getResourceById("15")).thenReturn(Optional.of(existing));
         when(resourceService.saveResource(existing)).thenReturn(existing);
 
-        ResponseEntity<Resource> response = resourceController.updateResource(15L, incoming);
+        ResponseEntity<Resource> response = resourceController.updateResource("15", incoming);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -86,9 +86,9 @@ class ResourceControllerTest {
     @Test
     void updateResource_whenMissing_returnsNotFound() {
         Resource incoming = buildResource("Any", "LAB", 1, "L", "Any", "AVAILABLE");
-        when(resourceService.getResourceById(404L)).thenReturn(Optional.empty());
+        when(resourceService.getResourceById("404")).thenReturn(Optional.empty());
 
-        ResponseEntity<Resource> response = resourceController.updateResource(404L, incoming);
+        ResponseEntity<Resource> response = resourceController.updateResource("404", incoming);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -96,19 +96,19 @@ class ResourceControllerTest {
     @Test
     void deleteResource_whenExists_returnsNoContent() {
         Resource existing = buildResource("Keep", "LAB", 5, "L1", "Any", "AVAILABLE");
-        when(resourceService.getResourceById(12L)).thenReturn(Optional.of(existing));
+        when(resourceService.getResourceById("12")).thenReturn(Optional.of(existing));
 
-        ResponseEntity<Void> response = resourceController.deleteResource(12L);
+        ResponseEntity<Void> response = resourceController.deleteResource("12");
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(resourceService).deleteResource(12L);
+        verify(resourceService).deleteResource("12");
     }
 
     @Test
     void deleteResource_whenMissing_returnsNotFound() {
-        when(resourceService.getResourceById(500L)).thenReturn(Optional.empty());
+        when(resourceService.getResourceById("500")).thenReturn(Optional.empty());
 
-        ResponseEntity<Void> response = resourceController.deleteResource(500L);
+        ResponseEntity<Void> response = resourceController.deleteResource("500");
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }

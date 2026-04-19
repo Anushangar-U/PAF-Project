@@ -6,7 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 /**
- * DataSeeder – populates H2 with demo data on every startup.
+ * DataSeeder – populates MongoDB with demo data on every startup.
  *
  * Seeds:
  *  • 3 users  (USER, TECHNICIAN, ADMIN)
@@ -41,7 +41,7 @@ public class DataSeeder implements CommandLineRunner {
         // ── 1. Seed Users ─────────────────────────────────────
         User ali   = createUser("Ali Hassan",  "ali@campus.edu",   UserRole.USER);
         User sara  = createUser("Sara Khan",   "sara@campus.edu",  UserRole.TECHNICIAN);
-        User admin = createUser("Admin User",  "admin@campus.edu", UserRole.ADMIN);
+        createUser("Admin User",  "admin@campus.edu", UserRole.ADMIN);
 
         // ── 2. Seed Tickets ───────────────────────────────────
         Ticket t1 = createTicket(
@@ -105,7 +105,7 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("🏛️   Resources → 8 facilities & assets");
         System.out.println("🚀  API  → http://localhost:9090/api/tickets");
         System.out.println("      → http://localhost:9090/api/resources");
-        System.out.println("📊  H2   → http://localhost:9090/h2-console");
+        System.out.println("🗄️   DB   → mongodb://localhost:27017/smart_campus");
         System.out.println("👤  Users → ali / sara / admin @campus.edu");
         System.out.println("=========================================");
     }
@@ -132,7 +132,10 @@ public class DataSeeder implements CommandLineRunner {
         t.setCategory(category);
         t.setPriority(priority);
         t.setStatus(status);
-        t.setReportedBy(reportedBy);
+        t.setReportedById(reportedBy.getId());
+        t.setReportedByName(reportedBy.getName());
+        t.setReportedByEmail(reportedBy.getEmail());
+        t.setReportedByRole(reportedBy.getRole());
         t.setContactName(reportedBy.getName());
         t.setContactEmail(reportedBy.getEmail());
         t.setAssignedTechnician(assignedTech);
@@ -143,7 +146,7 @@ public class DataSeeder implements CommandLineRunner {
     private void addComment(Ticket ticket, String authorName,
                             String authorRole, String content) {
         Comment c = new Comment();
-        c.setTicket(ticket);
+        c.setTicketId(ticket.getId());
         c.setAuthorName(authorName);
         c.setAuthorRole(authorRole);
         c.setContent(content);

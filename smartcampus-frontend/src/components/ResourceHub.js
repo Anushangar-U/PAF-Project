@@ -113,15 +113,15 @@ const ResourceHub = ({ facultyId, facultyName }) => {
   }, [fetchResources, fetchActiveBookings]);
 
   // Get booking status for a resource
-  const getResourceBookingStatus = (resourceId) => {
+  const getResourceBookingStatus = useCallback((resourceId) => {
     const booking = activeBookings.find(b => b.resourceId === resourceId);
     return booking ? booking.status : null;
-  };
+  }, [activeBookings]);
 
   // Get booking info for a resource
-  const getBookingInfo = (resourceId) => {
+  const getBookingInfo = useCallback((resourceId) => {
     return activeBookings.find(b => b.resourceId === resourceId);
-  };
+  }, [activeBookings]);
 
   // Open booking modal with selected resource
   const handleRequestResource = (resource) => {
@@ -201,7 +201,7 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     const booked = resources.filter(r => getResourceBookingStatus(r.id) === 'APPROVED').length;
     const outOfService = resources.filter(r => r.status === 'OUT_OF_SERVICE').length;
     return { total, available, pending, booked, outOfService };
-  }, [resources, activeBookings]);
+  }, [resources, getResourceBookingStatus]);
 
   const handleFormSuccess = () => {
     fetchResources();

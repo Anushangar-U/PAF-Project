@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * Seeds:
  *  • 3 users  (USER, TECHNICIAN, ADMIN)
  *  • 5 tickets in various statuses
- *  • 3 comments across tickets
+ *  • 4 comments across tickets
  *  • 8 resources (facilities & assets)
  *
  * Mirrors the frontend DEMO_USERS / DEMO_TICKETS constants so the
@@ -37,6 +37,12 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+
+        // Prevent duplicate demo records when the app restarts.
+        if (ticketRepository.count() > 0 || commentRepository.count() > 0 || resourceRepository.count() > 0) {
+            System.out.println("Demo data already exists. Skipping DataSeeder.");
+            return;
+        }
 
         // ── 1. Seed Users ─────────────────────────────────────
         User ali   = createUser("Ali Hassan",  "ali@campus.edu",   UserRole.USER);
@@ -95,7 +101,7 @@ public class DataSeeder implements CommandLineRunner {
         createResource("Main Canteen", "CAFETERIA", 300, "Ground Floor, Central Block", "06:00-22:00", "AVAILABLE");
         createResource("Room 201", "CLASSROOM", 50, "Building B, 2nd Floor", "08:00-17:00", "MAINTENANCE");
         createResource("Central Library", "LIBRARY", 200, "Library Wing, 1st Floor", "07:00-21:00", "AVAILABLE");
-        createResource("Computer Lab A", "LAB", 30, "Building A, 3rd Floor", "09:00-17:00", "AVAILABLE");
+        createResource("Computer Lab A", "LABORATORY", 30, "Building A, 3rd Floor", "09:00-17:00", "AVAILABLE");
         createResource("Sports Complex", "SPORTS", 1000, "Behind Main Building", "06:00-20:00", "AVAILABLE");
         createResource("Medical Clinic", "MEDICAL", 25, "Health Center, Building C", "08:00-16:00", "AVAILABLE");
 
@@ -103,9 +109,9 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("✅  Smart Campus demo data seeded.");
         System.out.println("🎫  Tickets → 5 demo tickets with statuses");
         System.out.println("🏛️   Resources → 8 facilities & assets");
-        System.out.println("🚀  API  → http://localhost:9090/api/tickets");
-        System.out.println("      → http://localhost:9090/api/resources");
-        System.out.println("🗄️   DB   → mongodb://localhost:27017/smart_campus");
+        System.out.println("🚀  API  → http://localhost:9091/api/tickets");
+        System.out.println("      → http://localhost:9091/api/resources");
+        System.out.println("🗄️   DB   → configured from MONGODB_URI (.env)");
         System.out.println("👤  Users → ali / sara / admin @campus.edu");
         System.out.println("=========================================");
     }

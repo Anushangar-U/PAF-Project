@@ -7,16 +7,18 @@ import {
   FaMapMarkerAlt,
   FaCheckCircle,
   FaExclamationTriangle,
-  FaClipboardList,
   FaEdit,
   FaTrash,
   FaPlus,
   FaTimes,
-  FaCalendarCheck
+  FaCalendarCheck,
+  FaClock
 } from 'react-icons/fa';
 import { RiOrganizationChart } from 'react-icons/ri';
+import axios from 'axios';
 import ResourceService from '../services/ResourceService';
 import AddResourceForm from './AddResourceForm';
+import BookingFormModal from './Bookings/BookingFormModal';
 import { useAuth } from '../hooks/useAuth';
 import './ResourceHub.css';
 
@@ -62,6 +64,9 @@ const ResourceHub = ({ facultyId, facultyName }) => {
   const [selectedType, setSelectedType] = useState('All');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [activeBookings, setActiveBookings] = useState([]);
 
   const fetchResources = useCallback(async () => {
     try {
@@ -85,14 +90,43 @@ const ResourceHub = ({ facultyId, facultyName }) => {
     }
   }, [facultyId]);
 
+  const fetchActiveBookings = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:9091/api/bookings');
+      const allBookings = response.data;
+      
+      // Get both PENDING and APPROVED bookings
+      const active = allBookings.filter(b => 
+        (b.status === 'APPROVED' || b.status === 'PENDING') && b.resourceId
+      );
+      
+      console.log('✅ Active bookings loaded:', active.length);
+      setActiveBookings(active);
+    } catch (error) {
+      console.error('❌ Error fetching bookings:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchResources();
-  }, [fetchResources]);
+    fetchActiveBookings();
+  }, [fetchResources, fetchActiveBookings]);
 
-  // Handle requesting ANY resource (not just equipment)
+  // Get booking status for a resource
+  const getResourceBookingStatus = (resourceId) => {
+    const booking = activeBookings.find(b => b.resourceId === resourceId);
+    return booking ? booking.status : null;
+  };
+
+  // Get booking info for a resource
+  const getBookingInfo = (resourceId) => {
+    return activeBookings.find(b => b.resourceId === resourceId);
+  };
+
+  // Open booking modal with selected resource
   const handleRequestResource = (resource) => {
-    const resourceTypeLabel = resource.type || 'Resource';
-    alert(`📋 Booking Request Submitted\n\nResource: ${resource.name}\nType: ${resourceTypeLabel}\nLocation: ${resource.location}\nCapacity: ${resource.capacity > 0 ? resource.capacity : 'N/A'}\n\nYour booking request has been sent for approval. You will be notified once it's processed.`);
+    setSelectedResource(resource);
+    setShowBookingModal(true);
   };
 
   // Handle edit resource (Admin only)
@@ -159,15 +193,27 @@ const ResourceHub = ({ facultyId, facultyName }) => {
 
   const stats = useMemo(() => {
     const total = resources.length;
-    const active = resources.filter(r => r.status === 'ACTIVE').length;
+    const available = resources.filter(r => {
+      const bookingStatus = getResourceBookingStatus(r.id);
+      return r.status === 'ACTIVE' && !bookingStatus;
+    }).length;
+    const pending = resources.filter(r => getResourceBookingStatus(r.id) === 'PENDING').length;
+    const booked = resources.filter(r => getResourceBookingStatus(r.id) === 'APPROVED').length;
     const outOfService = resources.filter(r => r.status === 'OUT_OF_SERVICE').length;
-    return { total, active, outOfService };
-  }, [resources]);
+    return { total, available, pending, booked, outOfService };
+  }, [resources, activeBookings]);
 
   const handleFormSuccess = () => {
     fetchResources();
     setShowAddForm(false);
     setEditingResource(null);
+  };
+
+  const handleBookingSuccess = () => {
+    setShowBookingModal(false);
+    setSelectedResource(null);
+    fetchActiveBookings(); // Refresh booking status
+    alert('Booking request submitted successfully! You will be notified once approved.');
   };
 
   return (
@@ -197,6 +243,20 @@ const ResourceHub = ({ facultyId, facultyName }) => {
           onResourceAdded={handleFormSuccess}
           facultyId={facultyId}
           facultyName={facultyName}
+          editResource={editingResource}
+          isEditing={!!editingResource} 
+        />
+      )}
+
+      {/* Booking Modal */}
+      {showBookingModal && selectedResource && (
+        <BookingFormModal
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedResource(null);
+          }}
+          onBooked={handleBookingSuccess}
+          resource={selectedResource}
         />
       )}
 
@@ -217,11 +277,19 @@ const ResourceHub = ({ facultyId, facultyName }) => {
         <div className="stats-container">
           <div className="stat-card">
             <span className="stat-value">{stats.total}</span>
-            <span className="stat-label">Total Resources</span>
+            <span className="stat-label">Total</span>
           </div>
-          <div className="stat-card active">
-            <span className="stat-value">{stats.active}</span>
-            <span className="stat-label">Active</span>
+          <div className="stat-card available">
+            <span className="stat-value">{stats.available}</span>
+            <span className="stat-label">Available</span>
+          </div>
+          <div className="stat-card pending">
+            <span className="stat-value">{stats.pending}</span>
+            <span className="stat-label">Pending</span>
+          </div>
+          <div className="stat-card booked">
+            <span className="stat-value">{stats.booked}</span>
+            <span className="stat-label">Booked</span>
           </div>
           <div className="stat-card out-of-service">
             <span className="stat-value">{stats.outOfService}</span>
@@ -291,79 +359,104 @@ const ResourceHub = ({ facultyId, facultyName }) => {
               </div>
 
               <div className="category-items-list">
-                {category.items.map((item) => (
-                  <div className="resource-item-row" key={item.id}>
-                    <div className="item-info">
-                      <div className="item-name-row">
-                        <h4>{item.name}</h4>
-                        <span className={`status-badge ${item.status?.toLowerCase()}`}>
-                          {item.status === 'ACTIVE' ? (
-                            <><FaCheckCircle /> Active</>
+                {category.items.map((item) => {
+                  const bookingStatus = getResourceBookingStatus(item.id);
+                  const bookingInfo = getBookingInfo(item.id);
+                  
+                  return (
+                    <div className="resource-item-row" key={item.id}>
+                      <div className="item-info">
+                        <div className="item-name-row">
+                          <h4>{item.name}</h4>
+                          {bookingStatus === 'APPROVED' ? (
+                            <span className="status-badge booked">
+                              <FaCalendarCheck /> Booked
+                            </span>
+                          ) : bookingStatus === 'PENDING' ? (
+                            <span className="status-badge pending">
+                              <FaClock /> Pending Approval
+                            </span>
+                          ) : item.status === 'ACTIVE' ? (
+                            <span className="status-badge active">
+                              <FaCheckCircle /> Available
+                            </span>
                           ) : item.status === 'OUT_OF_SERVICE' ? (
-                            <><FaExclamationTriangle /> Out of Service</>
+                            <span className="status-badge out_of_service">
+                              <FaExclamationTriangle /> Out of Service
+                            </span>
                           ) : (
-                            item.status
+                            <span className="status-badge">{item.status}</span>
                           )}
-                        </span>
-                      </div>
-                      <span className="item-location">
-                        <FaMapMarkerAlt className="pin-icon" /> {item.location}
-                      </span>
-                      <span className="item-availability">
-                        🕐 {item.availabilityWindows}
-                      </span>
-                    </div>
-                    
-                    <div className="item-action">
-                      <div className="item-capacity">
-                        <span className="capacity-value">{item.capacity > 0 ? item.capacity : '—'}</span>
-                        <span className="capacity-label">Capacity</span>
-                      </div>
-                      
-                      {/* ADMIN ACTIONS */}
-                      {!authLoading && isAdmin && (
-                        <div className="admin-actions">
-                          <button 
-                            className="btn-edit"
-                            onClick={() => handleEditResource(item)}
-                            title="Edit Resource"
-                          >
-                            <FaEdit /> Edit
-                          </button>
-                          <button 
-                            className="btn-delete"
-                            onClick={() => handleDeleteResource(item.id, item.name)}
-                            title="Delete Resource"
-                          >
-                            <FaTrash /> Delete
-                          </button>
                         </div>
-                      )}
+                        <span className="item-location">
+                          <FaMapMarkerAlt className="pin-icon" /> {item.location}
+                        </span>
+                        <span className="item-availability">
+                          <FaClock className="pin-icon" /> {item.availabilityWindows}
+                        </span>
+                        {bookingInfo && (
+                          <span className="item-booked-info">
+                            {bookingStatus === 'APPROVED' ? '📅 Booked' : '⏳ Pending'}
+                            {bookingInfo.endTime && ` until ${new Date(bookingInfo.endTime).toLocaleDateString()}`}
+                          </span>
+                        )}
+                      </div>
                       
-                      {/* USER ACTIONS - Request button for ALL active resources */}
-                      {!authLoading && !isAdmin && item.status === 'ACTIVE' && (
-                        <button 
-                          className="btn-request-resource"
-                          onClick={() => handleRequestResource(item)}
-                          title="Request this resource"
-                        >
-                          <FaCalendarCheck /> Request
-                        </button>
-                      )}
-                      
-                      {/* Unavailable button for OUT_OF_SERVICE resources */}
-                      {!authLoading && !isAdmin && item.status !== 'ACTIVE' && (
-                        <button 
-                          className="btn-request-resource disabled"
-                          disabled
-                          title="This resource is currently unavailable"
-                        >
-                          <FaExclamationTriangle /> Unavailable
-                        </button>
-                      )}
+                      <div className="item-action">
+                        <div className="item-capacity">
+                          <span className="capacity-value">{item.capacity > 0 ? item.capacity : '—'}</span>
+                          <span className="capacity-label">Capacity</span>
+                        </div>
+                        
+                        {/* ADMIN ACTIONS */}
+                        {!authLoading && isAdmin && (
+                          <div className="admin-actions">
+                            <button 
+                              className="btn-edit"
+                              onClick={() => handleEditResource(item)}
+                              title="Edit Resource"
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                            <button 
+                              className="btn-delete"
+                              onClick={() => handleDeleteResource(item.id, item.name)}
+                              title="Delete Resource"
+                            >
+                              <FaTrash /> Delete
+                            </button>
+                          </div>
+                        )}
+                        
+                        {/* USER ACTIONS */}
+                        {!authLoading && !isAdmin && (
+                          <>
+                            {bookingStatus === 'APPROVED' ? (
+                              <button className="btn-request-resource disabled" disabled>
+                                <FaCalendarCheck /> Currently Booked
+                              </button>
+                            ) : bookingStatus === 'PENDING' ? (
+                              <button className="btn-request-resource pending disabled" disabled>
+                                <FaClock /> Pending Approval
+                              </button>
+                            ) : item.status === 'ACTIVE' ? (
+                              <button 
+                                className="btn-request-resource"
+                                onClick={() => handleRequestResource(item)}
+                              >
+                                <FaCalendarCheck /> Request
+                              </button>
+                            ) : (
+                              <button className="btn-request-resource disabled" disabled>
+                                <FaExclamationTriangle /> Unavailable
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

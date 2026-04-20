@@ -6,8 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -21,10 +24,11 @@ public class BookingService {
     public Booking createBooking(Booking booking) {
         validateBooking(booking);
 
-        List<Booking> conflicts = bookingRepository.findConflictingApprovedBookings(
+        List<Booking> conflicts = bookingRepository.findByResourceIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
                 booking.getResourceId(),
-                booking.getStartTime(),
-                booking.getEndTime()
+                "APPROVED",
+                booking.getEndTime(),
+                booking.getStartTime()
         );
 
         if (!conflicts.isEmpty()) {
@@ -45,14 +49,15 @@ public class BookingService {
         return bookingRepository.findAll();
     }
 
-    public Booking approveBooking(Long id) {
+    public Booking approveBooking(String id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
-        List<Booking> conflicts = bookingRepository.findConflictingApprovedBookings(
+        List<Booking> conflicts = bookingRepository.findByResourceIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(
                 booking.getResourceId(),
-                booking.getStartTime(),
-                booking.getEndTime()
+                "APPROVED",
+                booking.getEndTime(),
+                booking.getStartTime()
         );
 
         if (!conflicts.isEmpty()) {
@@ -65,7 +70,7 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public Booking rejectBooking(Long id, String reason) {
+    public Booking rejectBooking(String id, String reason) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
@@ -75,12 +80,26 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public Booking cancelBooking(Long id) {
+    public Booking cancelBooking(String id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         booking.setStatus("CANCELLED");
         return bookingRepository.save(booking);
+    }
+
+    public List<Map<String, String>> getBookedSlots(String resourceId, String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        LocalDateTime dayStart = localDate.atStartOfDay();
+        LocalDateTime dayEnd = localDate.plusDays(1).atStartOfDay();
+
+        return bookingRepository.findApprovedBookingsForResourceOnDate(resourceId, dayStart, dayEnd)
+                .stream()
+                .map(b -> Map.of(
+                        "startTime", b.getStartTime().toLocalTime().toString(),
+                        "endTime", b.getEndTime().toLocalTime().toString()
+                ))
+                .collect(Collectors.toList());
     }
 
     private void validateBooking(Booking booking) {
@@ -96,8 +115,8 @@ public class BookingService {
         if (!booking.getStartTime().isBefore(booking.getEndTime())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time must be before end time");
         }
-        if (booking.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking cannot be created for a past time");
+        if (booking.getStartTime().isBefore(LocalDateTime.now().minusMinutes(5))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking cannot be created for a past time. Please select a future date and time.");
         }
     }
 }

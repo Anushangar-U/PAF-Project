@@ -206,6 +206,46 @@ class TicketServiceTest {
     }
 
     @Test
+    void createTicket_rejectsWhenContactEmailMissing() {
+        BadRequestException ex = assertThrows(
+            BadRequestException.class,
+            () -> ticketService.createTicket(
+                "Title",
+                "Description",
+                "Location",
+                "OTHER",
+                "LOW",
+                "User",
+                "   ",
+                null,
+                null
+            )
+        );
+
+        assertTrue(ex.getMessage().contains("Contact email is required"));
+    }
+
+    @Test
+    void createTicket_rejectsWhenContactEmailInvalid() {
+        BadRequestException ex = assertThrows(
+            BadRequestException.class,
+            () -> ticketService.createTicket(
+                "Title",
+                "Description",
+                "Location",
+                "OTHER",
+                "LOW",
+                "User",
+                "invalid-email",
+                null,
+                null
+            )
+        );
+
+        assertTrue(ex.getMessage().contains("Invalid contact email format"));
+    }
+
+    @Test
     void getAllTickets_returnsEnrichedResponses() {
         Ticket t1 = baseTicket("T-8", TicketStatus.OPEN);
         t1.setCreatedAt(LocalDateTime.now().minusHours(1));

@@ -5,6 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 import { CATEGORIES, PRIORITY } from '../../utils/constants';
 import './TicketForm.css';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
 /**
  * TicketForm
  * Modal form for creating a new incident ticket.
@@ -35,6 +37,11 @@ function TicketForm({ onClose, onCreated }) {
     if (!form.description.trim()) e.description = 'Description is required';
     if (!form.location.trim())    e.location    = 'Location is required';
     if (!form.category)           e.category    = 'Please select a category';
+    if (!form.contactEmail.trim()) {
+      e.contactEmail = 'Contact email is required';
+    } else if (!EMAIL_REGEX.test(form.contactEmail.trim())) {
+      e.contactEmail = 'Please enter a valid email address';
+    }
     return e;
   };
 
@@ -204,7 +211,9 @@ function TicketForm({ onClose, onCreated }) {
 
             {/* Contact Email */}
             <div className="ticket-form-field">
-              <label>Contact Email</label>
+              <label>
+                Contact Email <span className="ticket-form-required">*</span>
+              </label>
               <input
                 id="ticket-contact-email"
                 type="email"
@@ -212,7 +221,11 @@ function TicketForm({ onClose, onCreated }) {
                 value={form.contactEmail}
                 onChange={handleChange}
                 placeholder="your@email.com"
+                required
               />
+              {errors.contactEmail && (
+                <small className="ticket-form-error">{errors.contactEmail}</small>
+              )}
             </div>
 
             {/* Attachments */}

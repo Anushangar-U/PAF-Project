@@ -79,4 +79,60 @@ describe('TicketForm', () => {
     expect(submittedForm.get('category')).toBe('IT_EQUIPMENT');
     expect(submittedForm.get('reportedById')).toBe('42');
   });
+
+  it('requires contact email', async () => {
+    const onCreated = jest.fn();
+
+    render(<TicketForm onClose={jest.fn()} onCreated={onCreated} />);
+
+    fireEvent.change(document.getElementById('ticket-title'), {
+      target: { value: 'Air conditioner issue' },
+    });
+    fireEvent.change(document.getElementById('ticket-description'), {
+      target: { value: 'AC is not cooling in Hall A' },
+    });
+    fireEvent.change(document.getElementById('ticket-location'), {
+      target: { value: 'Hall A' },
+    });
+    fireEvent.change(document.getElementById('ticket-category'), {
+      target: { value: 'HVAC' },
+    });
+    fireEvent.change(document.getElementById('ticket-contact-email'), {
+      target: { value: '' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /submit ticket/i }));
+
+    expect(await screen.findByText('Contact email is required')).toBeInTheDocument();
+    expect(ticketService.createTicket).not.toHaveBeenCalled();
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it('validates contact email format', async () => {
+    const onCreated = jest.fn();
+
+    render(<TicketForm onClose={jest.fn()} onCreated={onCreated} />);
+
+    fireEvent.change(document.getElementById('ticket-title'), {
+      target: { value: 'Air conditioner issue' },
+    });
+    fireEvent.change(document.getElementById('ticket-description'), {
+      target: { value: 'AC is not cooling in Hall A' },
+    });
+    fireEvent.change(document.getElementById('ticket-location'), {
+      target: { value: 'Hall A' },
+    });
+    fireEvent.change(document.getElementById('ticket-category'), {
+      target: { value: 'HVAC' },
+    });
+    fireEvent.change(document.getElementById('ticket-contact-email'), {
+      target: { value: 'invalid-email' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /submit ticket/i }));
+
+    expect(await screen.findByText('Please enter a valid email address')).toBeInTheDocument();
+    expect(ticketService.createTicket).not.toHaveBeenCalled();
+    expect(onCreated).not.toHaveBeenCalled();
+  });
 });

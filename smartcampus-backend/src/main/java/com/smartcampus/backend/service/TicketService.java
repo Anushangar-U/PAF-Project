@@ -21,6 +21,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
 
 /**
  * TicketService – core business logic for the ticketing system.
@@ -32,6 +33,9 @@ import java.time.temporal.ChronoUnit;
  */
 @Service
 public class TicketService {
+
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private final TicketRepository     ticketRepository;
     private final UserRepository       userRepository;
@@ -113,6 +117,14 @@ public class TicketService {
             throw new BadRequestException("Maximum 3 attachments allowed per ticket.");
         }
 
+        String normalizedContactEmail = contactEmail == null ? "" : contactEmail.trim();
+        if (normalizedContactEmail.isEmpty()) {
+            throw new BadRequestException("Contact email is required.");
+        }
+        if (!EMAIL_PATTERN.matcher(normalizedContactEmail).matches()) {
+            throw new BadRequestException("Invalid contact email format.");
+        }
+
         Ticket ticket = new Ticket();
         ticket.setTitle(title);
         ticket.setDescription(description);
@@ -122,7 +134,7 @@ public class TicketService {
             ? Priority.valueOf(priorityStr.toUpperCase())
             : Priority.MEDIUM);
         ticket.setContactName(contactName);
-        ticket.setContactEmail(contactEmail);
+        ticket.setContactEmail(normalizedContactEmail);
 
         if (reportedById != null) {
             userRepository.findById(reportedById).ifPresent(reporter -> {

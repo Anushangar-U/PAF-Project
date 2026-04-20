@@ -81,7 +81,7 @@ public class TicketController {
      *
      * Form fields:
      *   title, description, location, category, priority (default MEDIUM),
-     *   contactName, contactEmail, reportedById, attachments (0–3 files)
+    *   contactName, contactEmail (required), reportedById, attachments (0–3 files)
      *
      * Returns 201 CREATED with the saved ticket.
      */
@@ -92,8 +92,8 @@ public class TicketController {
             @RequestParam("location")                                      String location,
             @RequestParam("category")                                      String category,
             @RequestParam(value = "priority",     defaultValue = "MEDIUM") String priority,
-            @RequestParam(value = "contactName",  required = false)        String contactName,
-            @RequestParam(value = "contactEmail", required = false)        String contactEmail,
+                @RequestParam(value = "contactName",  required = false)        String contactName,
+                @RequestParam("contactEmail")                                   String contactEmail,
             @RequestParam(value = "reportedById", required = false)        String reportedById,
             @RequestParam(value = "attachments",  required = false)        List<MultipartFile> attachments
     ) {

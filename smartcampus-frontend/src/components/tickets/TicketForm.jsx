@@ -23,8 +23,8 @@ function TicketForm({ onClose, onCreated }) {
     location:     '',
     category:     '',
     priority:     PRIORITY.MEDIUM,
-    contactName:  currentUser?.name  ?? '',
-    contactEmail: currentUser?.email ?? '',
+    contactName:  '',
+    contactEmail: '',
   });
   const [images,     setImages]     = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -204,7 +204,7 @@ function TicketForm({ onClose, onCreated }) {
                   name="contactName"
                   value={form.contactName}
                   onChange={handleChange}
-                  placeholder="Your full name"
+                  placeholder={currentUser?.name ?? 'Ali Hassan'}
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ function TicketForm({ onClose, onCreated }) {
                 name="contactEmail"
                 value={form.contactEmail}
                 onChange={handleChange}
-                placeholder="your@email.com"
+                placeholder={currentUser?.email ?? 'ali@campus.edu'}
                 required
               />
               {errors.contactEmail && (

@@ -30,6 +30,18 @@ describe('TicketForm', () => {
     jest.clearAllMocks();
   });
 
+  it('shows contact details as placeholders, not prefilled values', () => {
+    render(<TicketForm onClose={jest.fn()} onCreated={jest.fn()} />);
+
+    const contactNameInput = document.getElementById('ticket-contact-name');
+    const contactEmailInput = document.getElementById('ticket-contact-email');
+
+    expect(contactNameInput).toHaveValue('');
+    expect(contactNameInput).toHaveAttribute('placeholder', 'Test User');
+    expect(contactEmailInput).toHaveValue('');
+    expect(contactEmailInput).toHaveAttribute('placeholder', 'test.user@campus.edu');
+  });
+
   it('validates required fields before submitting', async () => {
     const onCreated = jest.fn();
 
@@ -65,6 +77,9 @@ describe('TicketForm', () => {
     fireEvent.change(document.getElementById('ticket-category'), {
       target: { value: 'IT_EQUIPMENT' },
     });
+    fireEvent.change(document.getElementById('ticket-contact-email'), {
+      target: { value: 'test.user@campus.edu' },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /submit ticket/i }));
 
@@ -77,6 +92,7 @@ describe('TicketForm', () => {
     expect(submittedForm).toBeInstanceOf(FormData);
     expect(submittedForm.get('title')).toBe('Projector issue');
     expect(submittedForm.get('category')).toBe('IT_EQUIPMENT');
+    expect(submittedForm.get('contactEmail')).toBe('test.user@campus.edu');
     expect(submittedForm.get('reportedById')).toBe('42');
   });
 

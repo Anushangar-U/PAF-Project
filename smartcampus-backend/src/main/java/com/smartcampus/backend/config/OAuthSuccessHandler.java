@@ -51,6 +51,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             }
         }
 
-        response.sendRedirect("http://localhost:3001");
+        response.sendRedirect("http://localhost:3000");// Redirect to frontend after successful login
     }
 }

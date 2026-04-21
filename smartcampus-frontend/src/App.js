@@ -20,6 +20,9 @@ import TicketListPage from './pages/TicketListPage';
 import TicketDetailsPage from './pages/TicketDetailsPage';
 import CreateTicketPage from './pages/CreateTicketPage';
 import { useAuth } from './hooks/useAuth';
+import LoginPage from './components/LoginPage';
+import NotificationsPage from './components/NotificationsPage';
+import AdminUsersPage from './components/AdminUsersPage';
 import './App.css';
 
 const NAV = '#0b1628';
@@ -1030,7 +1033,7 @@ const AdminPanel = () => {
 // MAIN APP COMPONENT                           //
 // ============================================ //
 function App() {
-  const { isLoading, isAdmin } = useAuth();
+ const { isLoading, isAdmin, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -1065,6 +1068,15 @@ function App() {
         
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* Login Route */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Notifications Route */}
+        <Route path="/notifications" element={<NotificationsPage currentUser={user} />} />
+
+        {/* Admin Users Route */}
+        <Route path="/admin-users" element={<AdminUsersPage />} />
       </Routes>
     </Router>
   );

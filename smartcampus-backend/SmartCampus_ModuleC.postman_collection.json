@@ -5,7 +5,7 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base", "value": "http://localhost:9090/api" },
+    { "key": "base", "value": "http://localhost:9091/api" },
     { "key": "ticketId", "value": "1" },
     { "key": "commentId", "value": "1" },
     { "key": "attachmentId", "value": "1" }
@@ -83,7 +83,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"technicianId\": 1\n}"
+              "raw": "{\n  \"technicianId\": \"1\"\n}"
             }
           }
         },
@@ -171,7 +171,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ticketId\": 1,\n  \"authorName\": \"Admin\",\n  \"authorRole\": \"ADMIN\",\n  \"content\": \"Escalated to electrical team.\"\n}"
+              "raw": "{\n  \"ticketId\": \"1\",\n  \"authorName\": \"Admin\",\n  \"authorRole\": \"ADMIN\",\n  \"content\": \"Escalated to electrical team.\"\n}"
             }
           }
         },

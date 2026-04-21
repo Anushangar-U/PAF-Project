@@ -144,12 +144,6 @@ const ModuleCTicketsPage = () => {
       <main className="flex-1">
         <div className="py-20" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
-            <div
-              className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
-              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}
-            >
-              Module C
-            </div>
             <h1 className="text-5xl font-extrabold tracking-tight text-white">
               Ticketing and Incident Management
             </h1>

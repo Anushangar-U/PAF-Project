@@ -3,10 +3,10 @@ import BookingFormModal from '../BookingFormModal';
 import { getBookingsByUserId, cancelBooking } from '../../../services/BookingService';
 import ResourceService from '../../../services/ResourceService';
 import { Calendar, Clock, CheckCircle2, XCircle, FileEdit, Trash2, Plus } from 'lucide-react';
-
-const TEMP_USER_ID = 1;
+import { useAuth } from '../../../hooks/useAuth';
 
 const MyBookings = () => {
+    const { user } = useAuth();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -21,8 +21,12 @@ const MyBookings = () => {
         setLoading(true);
         setError('');
         try {
+            // Use actual user ID from auth
+            const userId = user?.id || user?.email || '1';
+            console.log('Fetching bookings for userId:', userId);
+            
             const [bookingsRes, resourcesRes] = await Promise.all([
-                getBookingsByUserId(TEMP_USER_ID),
+                getBookingsByUserId(userId),
                 ResourceService.getAllResources(),
             ]);
 
@@ -30,13 +34,15 @@ const MyBookings = () => {
                 (resourcesRes.data || []).map((r) => [r.id, r.name])
             );
 
-            setBookings(
-                bookingsRes.data.map((b) => ({
-                    ...b,
-                    resourceName: resourceMap[b.resourceId] || 'Unknown Resource',
-                }))
-            );
-        } catch {
+            const bookingsWithResource = (bookingsRes.data || []).map((b) => ({
+                ...b,
+                resourceName: resourceMap[b.resourceId] || 'Unknown Resource',
+            }));
+            
+            console.log('Bookings loaded:', bookingsWithResource.length);
+            setBookings(bookingsWithResource);
+        } catch (err) {
+            console.error('Failed to fetch bookings:', err);
             setError('Failed to fetch bookings');
         } finally {
             setLoading(false);
@@ -44,8 +50,10 @@ const MyBookings = () => {
     };
 
     useEffect(() => {
-        refreshBookings();
-    }, []);
+        if (user) {
+            refreshBookings();
+        }
+    }, [user]);
 
     const totalPages = Math.max(1, Math.ceil(bookings.length / itemsPerPage));
     const paginated = bookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -67,8 +75,24 @@ const MyBookings = () => {
         setCancelId(null);
     };
 
-    if (loading) return <div className="flex items-center justify-center min-h-[500px] text-muted-foreground">Loading bookings...</div>;
-    if (error) return <div className="flex items-center justify-center min-h-[500px] text-destructive">{error}</div>;
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px] text-slate-500">
+                <div className="text-center">
+                    <div className="loading-spinner mb-4"></div>
+                    <p>Loading bookings...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px] text-red-500">
+                {error}
+            </div>
+        );
+    }
 
     const total = bookings.length;
     const pending = bookings.filter((b) => b.status === 'PENDING').length;
@@ -77,10 +101,32 @@ const MyBookings = () => {
 
     const renderStatusBadge = (status) => {
         const lower = status?.toLowerCase() || '';
-        if (lower === 'approved') return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/>Approved</span>;
-        if (lower === 'pending') return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800"><Clock className="w-3 h-3 mr-1"/>Pending</span>;
-        if (lower === 'rejected') return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1"/>Rejected</span>;
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">{status}</span>;
+        if (lower === 'approved') {
+            return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />Approved
+                </span>
+            );
+        }
+        if (lower === 'pending') {
+            return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                    <Clock className="w-3 h-3 mr-1" />Pending
+                </span>
+            );
+        }
+        if (lower === 'rejected') {
+            return (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                    <XCircle className="w-3 h-3 mr-1" />Rejected
+                </span>
+            );
+        }
+        return (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                {status}
+            </span>
+        );
     };
 
     return (
@@ -89,7 +135,7 @@ const MyBookings = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">My Bookings</h1>
-                    <p className="text-muted-foreground mt-1 text-slate-500">View and manage your resource bookings</p>
+                    <p className="text-slate-500 mt-1">View and manage your resource bookings</p>
                 </div>
                 <button 
                     onClick={() => setShowBookingModal(true)}
@@ -102,28 +148,28 @@ const MyBookings = () => {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between">
+                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between shadow-sm">
                     <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <h3 className="tracking-tight text-sm font-medium text-slate-500">Total Bookings</h3>
                         <Calendar className="h-4 w-4 text-slate-400" />
                     </div>
                     <div><div className="text-3xl font-bold">{total}</div></div>
                 </div>
-                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between">
+                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between shadow-sm">
                     <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <h3 className="tracking-tight text-sm font-medium text-slate-500">Pending</h3>
                         <Clock className="h-4 w-4 text-amber-500" />
                     </div>
                     <div><div className="text-3xl font-bold text-amber-600">{pending}</div></div>
                 </div>
-                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between">
+                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between shadow-sm">
                     <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <h3 className="tracking-tight text-sm font-medium text-slate-500">Approved</h3>
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     </div>
                     <div><div className="text-3xl font-bold text-emerald-600">{approved}</div></div>
                 </div>
-                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between">
+                <div className="rounded border bg-white text-slate-900 p-6 flex flex-col justify-between shadow-sm">
                     <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <h3 className="tracking-tight text-sm font-medium text-slate-500">Rejected</h3>
                         <XCircle className="h-4 w-4 text-red-500" />
@@ -151,17 +197,23 @@ const MyBookings = () => {
                         <tbody className="[&_tr:last-child]:border-0 text-slate-700">
                             {bookings.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">No bookings found.</td>
+                                    <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">
+                                        No bookings found.
+                                    </td>
                                 </tr>
                             )}
                             {paginated.map((b) => (
                                 <tr key={b.id} className="border-b transition-colors hover:bg-slate-50/80 data-[state=selected]:bg-slate-50">
                                     <td className="p-4 align-middle font-medium text-slate-900">{b.resourceName}</td>
-                                    <td className="p-4 align-middle text-slate-600">{b.purpose || <span className="text-slate-400 italic">Not specified</span>}</td>
+                                    <td className="p-4 align-middle text-slate-600">
+                                        {b.purpose || <span className="text-slate-400 italic">Not specified</span>}
+                                    </td>
                                     <td className="p-4 align-middle">
                                         <div className="flex flex-col">
                                             <span>{formatDateOnly(b.startTime)}</span>
-                                            <span className="text-xs text-slate-500">{formatTimeOnly(b.startTime)} - {formatTimeOnly(b.endTime)}</span>
+                                            <span className="text-xs text-slate-500">
+                                                {formatTimeOnly(b.startTime)} - {formatTimeOnly(b.endTime)}
+                                            </span>
                                         </div>
                                     </td>
                                     <td className="p-4 align-middle">{renderStatusBadge(b.status)}</td>
@@ -195,7 +247,9 @@ const MyBookings = () => {
                 {!loading && !error && bookings.length > 0 && totalPages > 1 && (
                     <div className="flex items-center justify-between border-t border-slate-200 bg-white p-4">
                         <p className="text-sm text-slate-500">
-                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, bookings.length)}</span> of <span className="font-medium">{bookings.length}</span> results
+                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                            <span className="font-medium">{Math.min(currentPage * itemsPerPage, bookings.length)}</span> of{' '}
+                            <span className="font-medium">{bookings.length}</span> results
                         </p>
                         <div className="flex gap-2">
                             <button
@@ -210,7 +264,11 @@ const MyBookings = () => {
                                     <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`inline-flex items-center justify-center rounded w-8 h-8 text-sm font-medium ${currentPage === page ? 'bg-slate-900 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                        className={`inline-flex items-center justify-center rounded w-8 h-8 text-sm font-medium ${
+                                            currentPage === page 
+                                                ? 'bg-slate-900 text-white' 
+                                                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                        }`}
                                     >
                                         {page}
                                     </button>
@@ -228,7 +286,7 @@ const MyBookings = () => {
                 )}
             </div>
 
-            {/* Modals */}
+            {/* Booking Form Modal */}
             {showBookingModal && (
                 <BookingFormModal
                     onClose={() => { setShowBookingModal(false); setEditBooking(null); }}
@@ -237,11 +295,14 @@ const MyBookings = () => {
                 />
             )}
 
+            {/* Cancel Confirmation Modal */}
             {showModal && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded border p-6 max-w-md w-full">
+                    <div className="bg-white rounded-lg border shadow-lg p-6 max-w-md w-full">
                         <h3 className="text-lg font-semibold text-slate-900 mb-2">Cancel Booking</h3>
-                        <p className="text-slate-500 text-sm mb-6">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+                        <p className="text-slate-500 text-sm mb-6">
+                            Are you sure you want to cancel this booking? This action cannot be undone.
+                        </p>
                         <div className="flex justify-end gap-3">
                             <button 
                                 onClick={handleModalCancel}
@@ -265,7 +326,11 @@ const MyBookings = () => {
 
 function formatDateOnly(dateTime) {
     try {
-        return new Date(dateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        return new Date(dateTime).toLocaleDateString('en-GB', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
     } catch {
         return dateTime;
     }
@@ -273,10 +338,13 @@ function formatDateOnly(dateTime) {
 
 function formatTimeOnly(dateTime) {
     try {
-        return new Date(dateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        return new Date(dateTime).toLocaleTimeString('en-GB', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
     } catch {
         return dateTime;
     }
 }
 
-export default MyBookings;
+export default MyBookings;

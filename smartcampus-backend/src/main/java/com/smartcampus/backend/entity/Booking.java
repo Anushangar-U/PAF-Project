@@ -1,7 +1,6 @@
 package com.smartcampus.backend.entity;
 
 import java.time.LocalDateTime;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,7 +10,7 @@ public class Booking {
     @Id
     private String id;
 
-    private Long userId;
+    private String userId;  // ✅ CHANGE FROM Long TO String
     private String resourceId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -29,8 +28,8 @@ public class Booking {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public String getUserId() { return userId; }  // ✅ String
+    public void setUserId(String userId) { this.userId = userId; }  // ✅ String
 
     public String getResourceId() { return resourceId; }
     public void setResourceId(String resourceId) { this.resourceId = resourceId; }

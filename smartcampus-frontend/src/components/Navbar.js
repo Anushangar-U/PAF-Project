@@ -1,24 +1,22 @@
+// src/components/Navbar.js
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { FaBell, FaUsersCog } from 'react-icons/fa';
 
 const NAV = '#0b1628';
 
 const Navbar = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading, logout } = useAuth();
   const navigate = useNavigate();
-  const isLoggedIn = !!user;
+  
+  const isLoggedIn = !isLoading && !!user;
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('dev_isAdmin');
-    navigate('/');
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleSignIn = () => {
-    localStorage.setItem('user', JSON.stringify({ name: 'Student', email: 'student@campus.edu', role: 'USER' }));
-    localStorage.setItem('token', 'mock-user-token');
-    window.location.reload();
+    navigate('/login');
   };
 
   return (
@@ -47,27 +45,50 @@ const Navbar = () => {
         
         {/* My Bookings - Only for logged in USERS (not admin) */}
         {isLoggedIn && !isAdmin && (
-          <Link to="/mybookings" className="font-semibold text-sm transition-colors hover:opacity-70"
-            style={{ color: NAV }}>MY BOOKINGS</Link>
+          <>
+            <Link to="/mybookings" className="font-semibold text-sm transition-colors hover:opacity-70"
+              style={{ color: NAV }}>MY BOOKINGS</Link>
+            <Link to="/notifications" className="font-semibold text-sm transition-colors hover:opacity-70"
+              style={{ color: NAV }}>
+              <FaBell className="inline mr-1" /> NOTIFICATIONS
+            </Link>
+          </>
         )}
         
-        {/* Admin Panel - Only for admin */}
-        {isAdmin && (
-          <Link to="/admin" className="font-semibold text-sm transition-colors hover:opacity-70"
-            style={{ color: '#dc2626' }}>ADMIN</Link>
+        {/* Admin Links - Only for admin */}
+        {isLoggedIn && isAdmin && (
+          <>
+            <Link to="/admin" className="font-semibold text-sm transition-colors hover:opacity-70"
+              style={{ color: '#dc2626' }}>ADMIN DASHBOARD</Link>
+            <Link to="/admin-users" className="font-semibold text-sm transition-colors hover:opacity-70"
+              style={{ color: NAV }}>
+              <FaUsersCog className="inline mr-1" /> MANAGE USERS
+            </Link>
+            <Link to="/notifications" className="font-semibold text-sm transition-colors hover:opacity-70"
+              style={{ color: NAV }}>
+              <FaBell className="inline mr-1" /> NOTIFICATIONS
+            </Link>
+          </>
         )}
       </div>
 
       {/* Auth Actions */}
       <div className="flex items-center space-x-4">
-        {isLoggedIn ? (
-          <button
-            onClick={handleLogout}
-            className="text-sm font-semibold transition-colors hover:opacity-70"
-            style={{ color: NAV }}
-          >
-            LOGOUT
-          </button>
+        {isLoading ? (
+          <div className="text-sm text-slate-400">Loading...</div>
+        ) : isLoggedIn ? (
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-500">
+              👤 {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-sm font-semibold transition-colors hover:opacity-70"
+              style={{ color: NAV }}
+            >
+              LOGOUT
+            </button>
+          </div>
         ) : (
           <button
             onClick={handleSignIn}

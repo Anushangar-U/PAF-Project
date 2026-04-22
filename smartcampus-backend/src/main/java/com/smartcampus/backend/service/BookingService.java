@@ -41,7 +41,8 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public List<Booking> getMyBookings(Long userId) {
+    // ✅ CHANGE Long TO String
+    public List<Booking> getMyBookings(String userId) {
         return bookingRepository.findByUserId(userId);
     }
 

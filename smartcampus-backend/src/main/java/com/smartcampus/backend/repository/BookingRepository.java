@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends MongoRepository<Booking, String> {
     
-    List<Booking> findByUserId(Long userId);
+    List<Booking> findByUserId(String userId);  // ✅ CHANGE FROM Long TO String
     
     @Query("{ 'resourceId': ?0, 'status': ?1, 'startTime': { $lt: ?2 }, 'endTime': { $gt: ?3 } }")
     List<Booking> findByResourceIdAndStatusAndStartTimeLessThanAndEndTimeGreaterThan(

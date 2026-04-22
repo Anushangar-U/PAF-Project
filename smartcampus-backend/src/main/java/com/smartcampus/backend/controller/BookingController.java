@@ -23,8 +23,9 @@ public class BookingController {
         return bookingService.createBooking(booking);
     }
 
+    // ✅ CHANGE Long TO String
     @GetMapping("/user/{userId}")
-    public List<Booking> getMyBookings(@PathVariable Long userId) {
+    public List<Booking> getMyBookings(@PathVariable String userId) {
         return bookingService.getMyBookings(userId);
     }
 

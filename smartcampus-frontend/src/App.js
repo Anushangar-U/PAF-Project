@@ -22,6 +22,7 @@ import LoginPage from './components/LoginPage';
 import NotificationsPage from './components/NotificationsPage';
 import AdminUsersPage from './components/AdminUsersPage';
 import './App.css';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 
 const NAV = '#0b1628';
 
@@ -1004,6 +1005,8 @@ function App() {
         {/* Notifications Route */}
         <Route path="/notifications" element={<NotificationsPage currentUser={user} />} />
 
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+        
         {/* Admin Users Route */}
         <Route path="/admin-users" element={<AdminUsersPage />} />
       </Routes>

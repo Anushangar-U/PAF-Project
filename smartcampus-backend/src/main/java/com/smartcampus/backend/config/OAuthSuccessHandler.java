@@ -71,6 +71,10 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
+        if (picture == null) {
+            picture = "";  // or just leave it null since you're not using it yet
+        }
+
         // Create a simple token
         String token = "jwt-token-" + user.getId() + "-" + System.currentTimeMillis();
         String role = user.getRole() != null ? user.getRole().toString() : "USER";

@@ -18,6 +18,10 @@ public class User {
 
     private UserRole role = UserRole.USER;
 
+    private String provider;
+
+    private String providerId;
+
     public User() {}
 
     public User(String id, String name, String email, UserRole role) {
@@ -32,4 +36,8 @@ public class User {
     public void setEmail(String e)   { this.email = e; }
     public UserRole getRole()        { return role; }
     public void setRole(UserRole r)  { this.role = r; }
+    public String getProvider()      { return provider; }
+    public void setProvider(String p){ this.provider = p; }
+    public String getProviderId()    { return providerId; }
+    public void setProviderId(String p){ this.providerId = p; }
 }

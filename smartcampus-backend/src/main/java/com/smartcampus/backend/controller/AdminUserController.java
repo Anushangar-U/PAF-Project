@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smartcampus.backend.entity.Role;
 import com.smartcampus.backend.entity.User;
+import com.smartcampus.backend.entity.UserRole;
 import com.smartcampus.backend.repository.UserRepository;
 
 @RestController
@@ -50,7 +50,7 @@ public class AdminUserController {
         }
 
         try {
-            Role newRole = Role.valueOf(roleValue.toUpperCase());
+            UserRole newRole = UserRole.valueOf(roleValue.toUpperCase());
             user.setRole(newRole);
             userRepository.save(user);
 
@@ -64,7 +64,7 @@ public class AdminUserController {
         User user = new User();
         user.setName("Holly");
         user.setEmail("holly@gmail.com");
-        user.setRole(Role.USER);
+        user.setRole(UserRole.USER);
         user.setProvider("LOCAL");
         user.setProviderId("TEST001");
 

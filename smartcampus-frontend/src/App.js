@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { 
   FaUniversity, 
   FaSignOutAlt, 
   FaHome, 
   FaCalendarCheck,
-  FaUserShield,
   FaDownload
 } from 'react-icons/fa';
 import axios from 'axios';
@@ -17,12 +16,11 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import TicketListPage from './pages/TicketListPage';
+import TicketDetailsPage from './pages/TicketDetailsPage';
+import CreateTicketPage from './pages/CreateTicketPage';
 import { useAuth } from './hooks/useAuth';
-import LoginPage from './components/LoginPage';
-import NotificationsPage from './components/NotificationsPage';
-import AdminUsersPage from './components/AdminUsersPage';
 import './App.css';
-import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 
 const NAV = '#0b1628';
 
@@ -30,7 +28,7 @@ const NAV = '#0b1628';
 // FACULTIES PAGE WITH HERO SECTION             //
 // ============================================ //
 const FacultiesPage = () => {
-  const { user } = useAuth();
+  const { user, loginAsDemoUser } = useAuth();
   const isLoggedIn = !!user;
 
   return (
@@ -54,11 +52,7 @@ const FacultiesPage = () => {
             {!isLoggedIn && (
               <div className="pt-4">
                 <button
-                  onClick={() => {
-                    localStorage.setItem('user', JSON.stringify({ name: 'Student', email: 'student@campus.edu', role: 'USER' }));
-                    localStorage.setItem('token', 'mock-user-token');
-                    window.location.reload();
-                  }}
+                  onClick={() => loginAsDemoUser()}
                   className="inline-block bg-white px-8 py-3.5 rounded text-base font-bold hover:bg-slate-100 transition-colors shadow-[0_4px_0_0_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-y-1"
                   style={{ color: NAV }}
                 >
@@ -129,6 +123,78 @@ const MyBookingsPage = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+// ============================================ //
+// MODULE C TICKETS PAGE                        //
+// ============================================ //
+const ModuleCTicketsPage = () => {
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showCreateTicket, setShowCreateTicket] = useState(false);
+  const [ticketRefreshKey, setTicketRefreshKey] = useState(0);
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+
+      <main className="flex-1">
+        <div className="py-20" style={{ background: NAV }}>
+          <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
+            <h1 className="text-5xl font-extrabold tracking-tight text-white">
+              Ticketing and Incident Management
+            </h1>
+            <p className="text-lg font-medium max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Create, track, update, and resolve infrastructure incidents with full status workflow.
+            </p>
+
+            {!selectedTicket && (
+              <div className="pt-4">
+                <button
+                  type="button"
+                  className="inline-block bg-white px-8 py-3.5 rounded text-base font-bold hover:bg-slate-100 transition-colors"
+                  style={{ color: NAV }}
+                  onClick={() => setShowCreateTicket(true)}
+                >
+                  + New Ticket
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-slate-50 py-8">
+          <div className="max-w-7xl mx-auto px-8">
+            {selectedTicket ? (
+              <TicketDetailsPage
+                ticket={selectedTicket}
+                onBack={(deleted = false) => {
+                  setSelectedTicket(null);
+                  if (deleted) {
+                    setTicketRefreshKey((k) => k + 1);
+                  }
+                }}
+              />
+            ) : (
+              <TicketListPage onSelect={setSelectedTicket} refreshKey={ticketRefreshKey} />
+            )}
+          </div>
+        </div>
+      </main>
+
+      {showCreateTicket && (
+        <CreateTicketPage
+          onClose={() => setShowCreateTicket(false)}
+          onCreated={() => {
+            setShowCreateTicket(false);
+            setSelectedTicket(null);
+            setTicketRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
 
       <Footer />
     </div>
@@ -897,13 +963,11 @@ const FacultiesManagement = () => {
 // ADMIN PANEL COMPONENT                        //
 // ============================================ //
 const AdminPanel = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [adminSection, setAdminSection] = useState('dashboard');
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('dev_isAdmin');
+    logout();
     window.location.href = '/';
   };
 
@@ -966,7 +1030,7 @@ const AdminPanel = () => {
 // MAIN APP COMPONENT                           //
 // ============================================ //
 function App() {
- const { isLoading, isAdmin, user } = useAuth();
+  const { isLoading, isAdmin } = useAuth();
 
   if (isLoading) {
     return (
@@ -978,7 +1042,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
@@ -987,6 +1051,9 @@ function App() {
         
         {/* FACULTIES PAGE */}
         <Route path="/faculties" element={<FacultiesPage />} />
+
+        {/* MODULE C TICKETS PAGE */}
+        <Route path="/tickets" element={<ModuleCTicketsPage />} />
         
         {/* MY BOOKINGS PAGE */}
         <Route path="/mybookings" element={<MyBookingsPage />} />
@@ -998,17 +1065,6 @@ function App() {
         
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
-
-        {/* Login Route */}
-        <Route path="/login" element={<LoginPage />} />
-
-        {/* Notifications Route */}
-        <Route path="/notifications" element={<NotificationsPage currentUser={user} />} />
-
-        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
-        
-        {/* Admin Users Route */}
-        <Route path="/admin-users" element={<AdminUsersPage />} />
       </Routes>
     </Router>
   );

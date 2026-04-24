@@ -8,10 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/resources")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") 
 public class ResourceController {
 
     private final ResourceService resourceService;
@@ -22,19 +24,6 @@ public class ResourceController {
         return new ResponseEntity<>(savedResource, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Resource> getResourceById(@PathVariable String id) {  // String
-        return resourceService.getResourceById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-    
-    @GetMapping("/faculty/{facultyId}")
-    public ResponseEntity<List<Resource>> getResourcesByFacultyId(@PathVariable String facultyId) {
-        List<Resource> resources = resourceService.getResourcesByFacultyId(facultyId);
-        return ResponseEntity.ok(resources);
-    }
-    
     @GetMapping
     public ResponseEntity<List<Resource>> getAllResources(@RequestParam(required = false) String type) {
         List<Resource> resources;
@@ -48,30 +37,34 @@ public class ResourceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Resource> updateResource(@PathVariable String id, @RequestBody Resource resourceDetails) {
-        return resourceService.getResourceById(id)
-            .map(existingResource -> {
-                existingResource.setName(resourceDetails.getName());
-                existingResource.setType(resourceDetails.getType());
-                existingResource.setCapacity(resourceDetails.getCapacity());
-                existingResource.setLocation(resourceDetails.getLocation());
-                existingResource.setAvailabilityWindows(resourceDetails.getAvailabilityWindows());
-                existingResource.setStatus(resourceDetails.getStatus());
-                existingResource.setFacultyId(resourceDetails.getFacultyId());
-                existingResource.setFacultyName(resourceDetails.getFacultyName());
-                
-                Resource updatedResource = resourceService.saveResource(existingResource);
-                return ResponseEntity.ok(updatedResource);
-            })
-            .orElse(ResponseEntity.notFound().build());
+        Optional<Resource> existingResource = resourceService.getResourceById(id);
+        
+        if (existingResource.isPresent()) {
+            Resource resourceToUpdate = existingResource.get();
+            resourceToUpdate.setName(resourceDetails.getName());
+            resourceToUpdate.setType(resourceDetails.getType());
+            resourceToUpdate.setCapacity(resourceDetails.getCapacity());
+            resourceToUpdate.setLocation(resourceDetails.getLocation());
+            resourceToUpdate.setAvailabilityWindows(resourceDetails.getAvailabilityWindows());
+            resourceToUpdate.setStatus(resourceDetails.getStatus());
+            
+            Resource updatedResource = resourceService.saveResource(resourceToUpdate);
+            return ResponseEntity.ok(updatedResource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteResource(@PathVariable String id) {  // String
-        return resourceService.getResourceById(id)
-            .map(resource -> {
-                resourceService.deleteResource(id);
-                return ResponseEntity.noContent().<Void>build();
-            })
-            .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deleteResource(@PathVariable String id) {
+        Optional<Resource> existingResource = resourceService.getResourceById(id);
+        
+        if (existingResource.isPresent()) {
+            resourceService.deleteResource(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

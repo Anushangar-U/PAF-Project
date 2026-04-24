@@ -10,8 +10,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.smartcampus.backend.entity.Role;
 import com.smartcampus.backend.entity.User;
+import com.smartcampus.backend.entity.UserRole;
 import com.smartcampus.backend.repository.UserRepository;
 
 import jakarta.servlet.ServletException;
@@ -54,7 +54,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
                 user = new User();
                 user.setName(name != null ? name : email.split("@")[0]);
                 user.setEmail(email);
-                user.setRole(Role.USER);
+                user.setRole(UserRole.USER);
                 user.setProvider("GOOGLE");
                 user.setProviderId(providerId);
                 user = userRepository.save(user);

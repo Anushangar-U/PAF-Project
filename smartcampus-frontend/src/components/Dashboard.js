@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  FaUniversity, FaChartLine, FaDraftingCompass, FaBookOpen, FaGraduationCap,
-  FaChalkboardTeacher, FaUsers, FaSearch, FaArrowLeft, FaEnvelope, FaPhone,
+  FaChartLine, FaDraftingCompass, FaBookOpen, FaGraduationCap,
+  FaUsers, FaSearch, FaArrowLeft, FaEnvelope, FaPhone,
   FaGlobe, FaCalendarAlt, FaClock, FaUserTie, FaMapMarkerAlt, FaUserFriends,
   FaEye, FaInfoCircle, FaBuilding, FaFlask, FaLaptop, FaMicroscope,
   FaCertificate
@@ -738,7 +738,7 @@ const FacultyInfoPage = ({ faculty, onBack }) => {
 };
 
 const Dashboard = ({ renderContent }) => {
-  const [activeTab, setActiveTab] = useState('faculties');
+  const activeTab = 'faculties';
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState(null);
 

@@ -2,23 +2,27 @@ package com.smartcampus.backend.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Configuration
 public class SecurityConfig {
 
     private final OAuthSuccessHandler oAuthSuccessHandler;
+    private final ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider;
 
-    public SecurityConfig(OAuthSuccessHandler oAuthSuccessHandler) {
+    public SecurityConfig(
+            OAuthSuccessHandler oAuthSuccessHandler,
+            ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider) {
         this.oAuthSuccessHandler = oAuthSuccessHandler;
+        this.clientRegistrationRepositoryProvider = clientRegistrationRepositoryProvider;
     }
 
     @Bean
@@ -26,29 +30,16 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/notifications/**").authenticated()
                 .anyRequest().permitAll()
-            )
-
-            .oauth2Login(oauth -> oauth
-                .successHandler(oAuthSuccessHandler)
-            )
-            
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\":\"Logged out successfully\"}");
-                })
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .clearAuthentication(true)
             );
+
+        if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
+            http.oauth2Login(oauth -> oauth.successHandler(oAuthSuccessHandler));
+        }
 
         return http.build();
     }

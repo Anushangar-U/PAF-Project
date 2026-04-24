@@ -3,6 +3,9 @@ package com.smartcampus.backend.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * User – system user with a role.
+ */
 @Document(collection = "users")
 public class User {
 
@@ -11,7 +14,7 @@ public class User {
 
     private String name;
     private String email;
-    private Role role;
+    private UserRole role = UserRole.USER;
 
     private String provider;     // GOOGLE or LOCAL
     private String providerId;   // Google unique ID
@@ -19,10 +22,17 @@ public class User {
     public User() {
     }
 
-    public User(String name, String email, Role role, String provider, String providerId) {
+    public User(String id, String name, String email, UserRole role) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
+    }
+
+    public User(String name, String email, Role role, String provider, String providerId) {
+        this.name = name;
+        this.email = email;
+        this.role = role == null ? UserRole.USER : UserRole.valueOf(role.name());
         this.provider = provider;
         this.providerId = providerId;
     }
@@ -51,12 +61,16 @@ public class User {
         this.email = email;
     }
 
-    public Role getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role == null ? UserRole.USER : UserRole.valueOf(role.name());
     }
 
     public String getProvider() {

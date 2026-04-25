@@ -1,11 +1,7 @@
+// src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { DEMO_USERS, ROLES } from '../utils/constants';
 
-/**
- * AuthContext.js
- * Lightweight in-memory auth store.
- * In production this integrates with JWT / OAuth tokens.
- */
 const AuthContext = createContext(null);
 
 const USER_STORAGE_KEY = 'user';
@@ -58,7 +54,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('dev_isAdmin');
   };
 
-  /** Switch active demo user by ID */
   const switchUser = (userId) => {
     const found = DEMO_USERS.find((u) => u.id === Number(userId));
     if (found) {
@@ -68,7 +63,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  /** Role-check helpers */
   const isAdmin      = isAdminUser(currentUser);
   const isTechnician = currentUser?.role === ROLES.TECHNICIAN;
   const isStaff      = isAdmin || isTechnician;
@@ -91,15 +85,12 @@ export function AuthProvider({ children }) {
   );
 
   return (
-    <AuthContext.Provider
-      value={value}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-/** Convenience hook */
 export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;

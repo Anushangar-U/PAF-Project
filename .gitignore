@@ -14,5 +14,7 @@ smartcampus-frontend/node_modules/
 .DS_Store
 Thumbs.db
 
+# Secrets and local config
+.env
 application-local.properties
 *.local.properties

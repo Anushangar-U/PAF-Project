@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { 
   FaUniversity, 
   FaSignOutAlt, 
   FaHome, 
   FaCalendarCheck,
-  FaDownload
+  FaDownload,
+  FaTicketAlt,
+  FaBell,
+  FaUsers,
+  FaCog
 } from 'react-icons/fa';
 import axios from 'axios';
 import Dashboard from './components/Dashboard';
@@ -21,14 +25,21 @@ import TicketDetailsPage from './pages/TicketDetailsPage';
 import CreateTicketPage from './pages/CreateTicketPage';
 import { useAuth } from './hooks/useAuth';
 import './App.css';
+import LoginPage from './components/LoginPage';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
+import NotificationsPage from './components/NotificationsPage';
+import AdminUsersPage from './components/AdminUsersPage';
+import { AuthProvider } from './context/AuthContext';
 
 const NAV = '#0b1628';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:9091';
 
 // ============================================ //
 // FACULTIES PAGE WITH HERO SECTION             //
 // ============================================ //
 const FacultiesPage = () => {
-  const { user, loginAsDemoUser } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const isLoggedIn = !!user;
 
   return (
@@ -52,7 +63,7 @@ const FacultiesPage = () => {
             {!isLoggedIn && (
               <div className="pt-4">
                 <button
-                  onClick={() => loginAsDemoUser()}
+                  onClick={() => navigate('/login')}
                   className="inline-block bg-white px-8 py-3.5 rounded text-base font-bold hover:bg-slate-100 transition-colors shadow-[0_4px_0_0_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-y-1"
                   style={{ color: NAV }}
                 >
@@ -130,7 +141,7 @@ const MyBookingsPage = () => {
 };
 
 // ============================================ //
-// MODULE C TICKETS PAGE                        //
+// TICKETS PAGE WITH HERO SECTION               //
 // ============================================ //
 const ModuleCTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -144,8 +155,12 @@ const ModuleCTicketsPage = () => {
       <main className="flex-1">
         <div className="py-20" style={{ background: NAV }}>
           <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
+            <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}>
+              Module C
+            </div>
             <h1 className="text-5xl font-extrabold tracking-tight text-white">
-              Ticketing and Incident Management
+              Ticketing & Incident Management
             </h1>
             <p className="text-lg font-medium max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
               Create, track, update, and resolve infrastructure incidents with full status workflow.
@@ -155,7 +170,7 @@ const ModuleCTicketsPage = () => {
               <div className="pt-4">
                 <button
                   type="button"
-                  className="inline-block bg-white px-8 py-3.5 rounded text-base font-bold hover:bg-slate-100 transition-colors"
+                  className="inline-block bg-white px-8 py-3.5 rounded text-base font-bold hover:bg-slate-100 transition-colors shadow-[0_4px_0_0_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-y-1"
                   style={{ color: NAV }}
                   onClick={() => setShowCreateTicket(true)}
                 >
@@ -202,6 +217,42 @@ const ModuleCTicketsPage = () => {
 };
 
 // ============================================ //
+// NOTIFICATIONS PAGE WITH HERO SECTION         //
+// ============================================ //
+const NotificationsPageWrapper = () => {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1">
+        <div className="py-20" style={{ background: NAV }}>
+          <div className="max-w-4xl mx-auto px-8 text-center space-y-6">
+            <div className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm"
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}>
+              Stay Updated
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tight text-white">
+              Notifications
+            </h1>
+            <p className="text-lg font-medium max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Stay informed about your bookings, approvals, and important campus updates.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 py-8">
+          <div className="max-w-7xl mx-auto px-8">
+            <NotificationsPage />
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+// ============================================ //
 // ADMIN OVERVIEW COMPONENT (WITH ALL FACULTIES)//
 // ============================================ //
 const AdminOverview = ({ setAdminSection }) => {
@@ -209,6 +260,9 @@ const AdminOverview = ({ setAdminSection }) => {
     totalResources: 0,
     pendingBookings: 0,
     approvedBookings: 0,
+    totalTickets: 0,
+    openTickets: 0,
+    totalUsers: 0,
     loading: true
   });
 
@@ -227,21 +281,29 @@ const AdminOverview = ({ setAdminSection }) => {
 
   const fetchStats = async () => {
     try {
-      const [resourcesRes, bookingsRes] = await Promise.all([
-        axios.get('http://localhost:9091/api/resources'),
-        axios.get('http://localhost:9091/api/bookings')
+      const [resourcesRes, bookingsRes, ticketsRes, usersRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/resources`),
+        axios.get(`${API_BASE_URL}/api/bookings`),
+        axios.get(`${API_BASE_URL}/api/tickets`).catch(() => ({ data: [] })),
+        axios.get(`${API_BASE_URL}/api/users`).catch(() => ({ data: [] }))
       ]);
 
       const totalResources = resourcesRes.data.length;
       const bookings = bookingsRes.data;
+      const tickets = ticketsRes.data;
+      const users = usersRes.data;
       
       const pendingBookings = bookings.filter(b => b.status === 'PENDING').length;
       const approvedBookings = bookings.filter(b => b.status === 'APPROVED').length;
+      const openTickets = tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length;
 
       setStats({
         totalResources,
         pendingBookings,
         approvedBookings,
+        totalTickets: tickets.length,
+        openTickets,
+        totalUsers: users.length,
         loading: false
       });
     } catch (error) {
@@ -253,15 +315,14 @@ const AdminOverview = ({ setAdminSection }) => {
   const fetchAnalytics = async () => {
     try {
       const [resourcesRes, bookingsRes] = await Promise.all([
-        axios.get('http://localhost:9091/api/resources'),
-        axios.get('http://localhost:9091/api/bookings')
+        axios.get(`${API_BASE_URL}/api/resources`),
+        axios.get(`${API_BASE_URL}/api/bookings`)
       ]);
 
       const resources = resourcesRes.data;
       const bookings = bookingsRes.data;
       const approvedBookings = bookings.filter(b => b.status === 'APPROVED');
 
-      // Count bookings per faculty
       const facultyBookingCount = {};
       
       approvedBookings.forEach(booking => {
@@ -270,7 +331,6 @@ const AdminOverview = ({ setAdminSection }) => {
         facultyBookingCount[facultyName] = (facultyBookingCount[facultyName] || 0) + 1;
       });
 
-      // Get ALL faculties with their stats
       const allFaculties = Object.entries(facultyBookingCount)
         .sort((a, b) => b[1] - a[1])
         .map(([facultyName, count]) => ({
@@ -280,7 +340,6 @@ const AdminOverview = ({ setAdminSection }) => {
           activeResources: resources.filter(r => r.facultyName === facultyName && r.status === 'ACTIVE').length
         }));
 
-      // Add faculties with 0 bookings
       const facultiesWithResources = [...new Set(resources.map(r => r.facultyName))];
       facultiesWithResources.forEach(facultyName => {
         if (!allFaculties.find(f => f.name === facultyName) && facultyName) {
@@ -293,13 +352,9 @@ const AdminOverview = ({ setAdminSection }) => {
         }
       });
 
-      // Remove any "Unknown" or empty faculty names
       const filteredFaculties = allFaculties.filter(f => f.name && f.name !== 'Unknown' && f.name !== 'Unassigned');
-      
-      // Sort by bookings (highest first)
       filteredFaculties.sort((a, b) => b.bookings - a.bookings);
 
-      // Utilization Rate
       const activeResources = resources.filter(r => r.status === 'ACTIVE').length;
       const bookedResources = new Set(approvedBookings.map(b => b.resourceId)).size;
       const utilizationRate = activeResources > 0 
@@ -346,6 +401,11 @@ const AdminOverview = ({ setAdminSection }) => {
           <div className="admin-stat-icon">✅</div>
           <div className="admin-stat-value">{stats.approvedBookings}</div>
           <div className="admin-stat-label">Approved Bookings</div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-icon">🎫</div>
+          <div className="admin-stat-value">{stats.openTickets}</div>
+          <div className="admin-stat-label">Open Tickets</div>
         </div>
       </div>
 
@@ -418,6 +478,24 @@ const AdminOverview = ({ setAdminSection }) => {
         </div>
       </div>
 
+      {/* Quick Stats Row */}
+      <div className="admin-quick-stats">
+        <div className="quick-stat-card">
+          <FaUsers className="quick-stat-icon" />
+          <div>
+            <div className="quick-stat-value">{stats.totalUsers}</div>
+            <div className="quick-stat-label">Total Users</div>
+          </div>
+        </div>
+        <div className="quick-stat-card">
+          <FaTicketAlt className="quick-stat-icon" />
+          <div>
+            <div className="quick-stat-value">{stats.totalTickets}</div>
+            <div className="quick-stat-label">Total Tickets</div>
+          </div>
+        </div>
+      </div>
+
       {/* Action Cards */}
       <div className="admin-action-cards">
         <div className="admin-action-card" onClick={() => setAdminSection('faculties')}>
@@ -432,6 +510,20 @@ const AdminOverview = ({ setAdminSection }) => {
           <h3>Booking Requests</h3>
           <p>Review, approve, or reject pending booking requests from students and staff.</p>
           <span className="action-link">View Requests →</span>
+        </div>
+
+        <div className="admin-action-card" onClick={() => setAdminSection('tickets')}>
+          <div className="action-card-icon">🎫</div>
+          <h3>Ticket Management</h3>
+          <p>Manage and resolve infrastructure tickets. Track incidents and maintenance requests.</p>
+          <span className="action-link">Manage Tickets →</span>
+        </div>
+
+        <div className="admin-action-card" onClick={() => setAdminSection('users')}>
+          <div className="action-card-icon">👥</div>
+          <h3>User Management</h3>
+          <p>Manage user accounts, roles, and permissions across the campus system.</p>
+          <span className="action-link">Manage Users →</span>
         </div>
       </div>
     </div>
@@ -479,7 +571,7 @@ const FacultiesManagement = () => {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get('http://localhost:9091/api/resources');
+      const response = await axios.get(`${API_BASE_URL}/api/resources`);
       setResources(response.data);
       setLastUpdated(new Date());
     } catch (error) {
@@ -521,7 +613,7 @@ const FacultiesManagement = () => {
   const handleDeleteResource = async (resourceId, resourceName) => {
     if (window.confirm(`Delete "${resourceName}"? This cannot be undone.`)) {
       try {
-        await axios.delete(`http://localhost:9091/api/resources/${resourceId}`);
+        await axios.delete(`${API_BASE_URL}/api/resources/${resourceId}`);
         alert('Resource deleted successfully');
         fetchResources();
       } catch (error) {
@@ -533,7 +625,7 @@ const FacultiesManagement = () => {
   const handleStatusToggle = async (resource) => {
     const newStatus = resource.status === 'ACTIVE' ? 'OUT_OF_SERVICE' : 'ACTIVE';
     try {
-      await axios.put(`http://localhost:9091/api/resources/${resource.id}`, {
+      await axios.put(`${API_BASE_URL}/api/resources/${resource.id}`, {
         ...resource,
         status: newStatus
       });
@@ -546,7 +638,7 @@ const FacultiesManagement = () => {
   const handleAddResource = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:9091/api/resources', newResource);
+      await axios.post(`${API_BASE_URL}/api/resources`, newResource);
       alert('Resource added successfully!');
       setShowAddModal(false);
       setNewResource({
@@ -574,7 +666,7 @@ const FacultiesManagement = () => {
   const handleUpdateResource = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:9091/api/resources/${editingResource.id}`, editingResource);
+      await axios.put(`${API_BASE_URL}/api/resources/${editingResource.id}`, editingResource);
       alert('Resource updated successfully!');
       setShowEditModal(false);
       setEditingResource(null);
@@ -958,9 +1050,101 @@ const FacultiesManagement = () => {
     </div>
   );
 };
+// ============================================ //
+// TECHNICIAN PANEL COMPONENT                   //
+// ============================================ //
+const TechnicianPanel = () => {
+  const { user, logout } = useAuth();
+  const [techSection, setTechSection] = useState('dashboard');
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
+  const handleBackToHome = () => {
+    window.location.href = '/';
+  };
+
+  return (
+    <div className="admin-full-page">
+      <header className="admin-header" style={{ background: NAV }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button 
+            onClick={handleBackToHome}
+            style={{
+              background: 'rgba(255,255,255,0.15)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              fontFamily: 'inherit'
+            }}
+          >
+            ← Back to Site
+          </button>
+          <h1 style={{ color: 'white' }}>Technician Dashboard</h1>
+        </div>
+        <div className="admin-header-right">
+          <span className="admin-badge" style={{ background: '#f59e0b' }}>Technician</span>
+          <button className="logout-btn-header" onClick={handleLogout}>
+            <FaSignOutAlt /> Logout
+          </button>
+        </div>
+      </header>
+
+      <div className="admin-page-tabs">
+        <button 
+          className={`admin-page-tab ${techSection === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setTechSection('dashboard')}
+        >
+          <FaHome /> Overview
+        </button>
+        <button 
+          className={`admin-page-tab ${techSection === 'bookings' ? 'active' : ''}`}
+          onClick={() => setTechSection('bookings')}
+        >
+          <FaCalendarCheck /> Booking Requests
+        </button>
+        <button 
+          className={`admin-page-tab ${techSection === 'tickets' ? 'active' : ''}`}
+          onClick={() => setTechSection('tickets')}
+        >
+          <FaTicketAlt /> Tickets
+        </button>
+      </div>
+
+      <div className="admin-page-content">
+        {techSection === 'dashboard' && (
+          <AdminOverview setAdminSection={setTechSection} />
+        )}
+
+        {techSection === 'bookings' && (
+          <div className="admin-bookings-container">
+            <AdminBookings />
+          </div>
+        )}
+
+        {techSection === 'tickets' && (
+          <div className="admin-bookings-container">
+            <h2 style={{ marginBottom: '20px', color: NAV }}>Ticket Management</h2>
+            <TicketListPage 
+              onSelect={() => {}} 
+              refreshKey={0}
+              isAdmin={true}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // ============================================ //
-// ADMIN PANEL COMPONENT                        //
+// ADMIN PANEL COMPONENT - FULL PAGE            //
 // ============================================ //
 const AdminPanel = () => {
   const { user, logout } = useAuth();
@@ -971,15 +1155,33 @@ const AdminPanel = () => {
     window.location.href = '/';
   };
 
+  const handleBackToHome = () => {
+    window.location.href = '/';
+  };
+
   return (
     <div className="admin-full-page">
-      <header className="admin-header">
-        <h1>Admin Dashboard</h1>
+      <header className="admin-header" style={{ background: NAV }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button 
+            onClick={handleBackToHome}
+            style={{
+              background: 'rgba(255,255,255,0.15)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              fontFamily: 'inherit'
+            }}
+          >
+            ← Back to Site
+          </button>
+          <h1 style={{ color: 'white' }}>Admin Dashboard</h1>
+        </div>
         <div className="admin-header-right">
-          <div className="admin-user-info">
-            <span className="admin-user-name">{user?.name || 'Administrator'}</span>
-            <span className="admin-badge">Admin</span>
-          </div>
           <button className="logout-btn-header" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
           </button>
@@ -1005,6 +1207,18 @@ const AdminPanel = () => {
         >
           <FaCalendarCheck /> Booking Requests
         </button>
+        <button 
+          className={`admin-page-tab ${adminSection === 'tickets' ? 'active' : ''}`}
+          onClick={() => setAdminSection('tickets')}
+        >
+          <FaTicketAlt /> Tickets
+        </button>
+        <button 
+          className={`admin-page-tab ${adminSection === 'users' ? 'active' : ''}`}
+          onClick={() => setAdminSection('users')}
+        >
+          <FaUsers /> Users
+        </button>
       </div>
 
       <div className="admin-page-content">
@@ -1021,6 +1235,23 @@ const AdminPanel = () => {
             <AdminBookings />
           </div>
         )}
+
+        {adminSection === 'tickets' && (
+          <div className="admin-bookings-container">
+            <h2 style={{ marginBottom: '20px', color: NAV }}>Ticket Management</h2>
+            <TicketListPage 
+              onSelect={() => {}} 
+              refreshKey={0}
+              isAdmin={true}
+            />
+          </div>
+        )}
+
+        {adminSection === 'users' && (
+          <div className="admin-bookings-container">
+            <AdminUsersPage />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1030,7 +1261,7 @@ const AdminPanel = () => {
 // MAIN APP COMPONENT                           //
 // ============================================ //
 function App() {
-  const { isLoading, isAdmin } = useAuth();
+  const { isLoading, isAdmin,isTechnician } = useAuth();
 
   if (isLoading) {
     return (
@@ -1044,6 +1275,12 @@ function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
+        {/* Login Route */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* OAuth2 Redirect Handler */}
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -1052,17 +1289,24 @@ function App() {
         {/* FACULTIES PAGE */}
         <Route path="/faculties" element={<FacultiesPage />} />
 
-        {/* MODULE C TICKETS PAGE */}
+        {/* TICKETS PAGE */}
         <Route path="/tickets" element={<ModuleCTicketsPage />} />
+
+        {/* NOTIFICATIONS PAGE */}
+        <Route path="/notifications" element={<NotificationsPageWrapper />} />
         
         {/* MY BOOKINGS PAGE */}
         <Route path="/mybookings" element={<MyBookingsPage />} />
         
-        {/* ADMIN ROUTE */}
+        {/* ADMIN ROUTE - FULL PAGE */}
         <Route path="/admin" element={
           isAdmin ? <AdminPanel /> : <Navigate to="/" replace />
         } />
-        
+        {/* TECHNICIAN ROUTE - FULL PAGE */}
+        <Route path="/technician" element={
+          isTechnician ? <TechnicianPanel /> : <Navigate to="/" replace />
+        } />
+
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

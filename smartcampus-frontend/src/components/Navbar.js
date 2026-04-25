@@ -1,12 +1,12 @@
+// src/components/Navbar.js
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV = '#0b1628';
 
 const Navbar = () => {
-  const { user, isAdmin, loginAsDemoUser, logout } = useAuth();
+  const { user, isAdmin,isTechnician, logout, isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const isLoggedIn = !!user;
 
   const handleLogout = () => {
     logout();
@@ -14,7 +14,7 @@ const Navbar = () => {
   };
 
   const handleSignIn = () => {
-    loginAsDemoUser();
+    navigate('/login');
   };
 
   return (
@@ -38,21 +38,29 @@ const Navbar = () => {
           style={{ color: NAV }}>ABOUT</Link>
         <Link to="/faculties" className="font-semibold text-sm transition-colors hover:opacity-70"
           style={{ color: NAV }}>FACULTIES</Link>
-        <Link to="/tickets" className="font-semibold text-sm transition-colors hover:opacity-70"
-          style={{ color: NAV }}>TICKETS</Link>
+        {isLoggedIn && !isAdmin && !isTechnician &&(
+          <Link to="/tickets" className="font-semibold text-sm transition-colors hover:opacity-70"
+           style={{ color: NAV }}>TICKETS</Link>
+        )}
         <Link to="/contact" className="font-semibold text-sm transition-colors hover:opacity-70"
           style={{ color: NAV }}>CONTACT</Link>
         
-        {/* My Bookings - Only for logged in USERS (not admin) */}
-        {isLoggedIn && !isAdmin && (
+        {isLoggedIn && !isAdmin && !isTechnician &&(
           <Link to="/mybookings" className="font-semibold text-sm transition-colors hover:opacity-70"
             style={{ color: NAV }}>MY BOOKINGS</Link>
         )}
-        
-        {/* Admin Panel - Only for admin */}
-        {isAdmin && (
+        {isLoggedIn && !isAdmin && !isTechnician && (
+          <Link to="/notifications" className="font-semibold text-sm transition-colors hover:opacity-70"
+            style={{ color: NAV }}>NOTIFICATIONS</Link>
+        )}
+        {isLoggedIn && isTechnician && !isAdmin && (
+          <Link to="/technician" className="font-semibold text-sm transition-colors hover:opacity-70"
+            style={{ color: NAV }}>TECHNICIAN PANEL</Link>
+        )}
+
+        {isLoggedIn && isAdmin && (
           <Link to="/admin" className="font-semibold text-sm transition-colors hover:opacity-70"
-            style={{ color: '#dc2626' }}>ADMIN</Link>
+            style={{ color: NAV }}>ADMIN PANEL</Link>
         )}
       </div>
 

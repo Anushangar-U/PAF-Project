@@ -1,3 +1,4 @@
+// src/components/LoginPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -25,6 +26,7 @@ function LoginPage() {
           Sign in with your Google account to access the platform.
         </p>
 
+        {/* Google Login Button */}
         <a
           href="http://localhost:9091/oauth2/authorization/google"
           style={{

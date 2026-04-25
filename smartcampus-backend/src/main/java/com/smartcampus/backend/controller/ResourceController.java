@@ -35,6 +35,12 @@ public class ResourceController {
         return ResponseEntity.ok(resources);
     }
 
+    @GetMapping("/faculty/{facultyId}")
+    public ResponseEntity<List<Resource>> getResourcesByFacultyId(@PathVariable String facultyId) {
+        List<Resource> resources = resourceService.getResourcesByFacultyId(facultyId);
+        return ResponseEntity.ok(resources);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Resource> updateResource(@PathVariable String id, @RequestBody Resource resourceDetails) {
         Optional<Resource> existingResource = resourceService.getResourceById(id);

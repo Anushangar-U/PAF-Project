@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,6 +23,18 @@ import jakarta.servlet.http.HttpServletResponse;
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
+    
+    private static final Set<String> ADMIN_EMAILS = Set.of(
+        "superiorreborn2003@gmail.com",
+        "adminnajla@gmail.com",
+        "Kuruyuvanu317@gmail.com"
+    );
+    
+    private static final Set<String> TECHNICIAN_EMAILS = Set.of(
+        "uthayashangaranushangar@gmail.com",
+        "techniciannajla@gmail.com",
+        "Yuvanujan731@gmail.com"
+    );
 
     public OAuthSuccessHandler(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -48,19 +61,34 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         
         if (email != null) {
             Optional<User> existingUser = userRepository.findByEmail(email);
+            
+            // Determine role
+            UserRole assignedRole;
+            if (ADMIN_EMAILS.contains(email)) {
+                assignedRole = UserRole.ADMIN;
+            } else if (TECHNICIAN_EMAILS.contains(email)) {
+                assignedRole = UserRole.TECHNICIAN;
+            } else {
+                assignedRole = UserRole.USER;
+            }
 
             if (existingUser.isEmpty()) {
                 System.out.println("Creating new user...");
                 user = new User();
                 user.setName(name != null ? name : email.split("@")[0]);
                 user.setEmail(email);
-                user.setRole(UserRole.USER);
+                user.setRole(assignedRole);
                 user.setProvider("GOOGLE");
                 user.setProviderId(providerId);
                 user = userRepository.save(user);
-                System.out.println("New user created with ID: " + user.getId());
+                System.out.println("New user created with ID: " + user.getId() + " role: " + assignedRole);
             } else {
                 user = existingUser.get();
+                if (!user.getRole().equals(assignedRole)) {
+                    user.setRole(assignedRole);
+                    user = userRepository.save(user);
+                    System.out.println("Updated existing user to " + assignedRole);
+                }
                 System.out.println("Existing user found with ID: " + user.getId());
             }
         }
@@ -71,15 +99,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        if (picture == null) {
-            picture = "";  // or just leave it null since you're not using it yet
-        }
-
-        // Create a simple token
         String token = "jwt-token-" + user.getId() + "-" + System.currentTimeMillis();
         String role = user.getRole() != null ? user.getRole().toString() : "USER";
         
-        // Build JSON string manually (no Jackson dependency needed)
         String userJson = "{"
                 + "\"id\":\"" + user.getId() + "\","
                 + "\"name\":\"" + escapeJson(user.getName()) + "\","
@@ -89,20 +111,15 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         
         System.out.println("User JSON: " + userJson);
         
-        // URL encode the token and user data
         String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
         String encodedUser = URLEncoder.encode(userJson, StandardCharsets.UTF_8);
         
-        // CRITICAL: Redirect to OAuth2RedirectHandler with token and user data
         String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + encodedToken + "&user=" + encodedUser;
         
         System.out.println("Redirecting to: " + redirectUrl);
-        
-        // Send the redirect
         response.sendRedirect(redirectUrl);
     }
     
-    // Helper method to escape JSON strings
     private String escapeJson(String str) {
         if (str == null) return "";
         return str.replace("\\", "\\\\")

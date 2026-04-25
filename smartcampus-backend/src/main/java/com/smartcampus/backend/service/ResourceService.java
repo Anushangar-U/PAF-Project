@@ -33,4 +33,9 @@ public class ResourceService {
     public void deleteResource(String id) {
         resourceRepository.deleteById(id);
     }
+    
+    // ADD THIS METHOD:
+    public List<Resource> getResourcesByFacultyId(String facultyId) {
+        return resourceRepository.findByFacultyId(facultyId);
+    }
 }
